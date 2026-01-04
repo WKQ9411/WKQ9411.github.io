@@ -1,4 +1,3 @@
-{% raw %}
 ﻿---
 layout: post
 title: 【手撕系列】手撕Transformer
@@ -79,7 +78,7 @@ Transformer 模型的核心思想是利用注意力机制来捕捉输入序列�
 
 如果将这个矩阵，直接输入至模型，模型是感受不到不同词语之间的顺序的。位置编码会用正弦函数和余弦函数的计算来实现。总的来说，要给 **<font color=red>单词向量矩阵中的每个元素，都进行编码</font>**。
 
-**位置编码具体公式**如下（公式中的 $d$ 即 $d_{model}$ ）：
+**位置编码具体公式**如下（公式中的 $d$ 即 $d\_{model}$ ）：
 
 $$
 \begin{aligned}
@@ -90,7 +89,7 @@ $$
 
 首先回顾一下三角函数：
 
-比如在$y=\sin(\omega x)$中，$\omega$是角频率，$x$是自变量，周期$T=2\pi/\omega$。在位置编码公式中，$\textcolor{red}{pos}$表示序列中某个单词的 **<font color=red>位置索引</font>**，可以理解为三角函数的自变量$x$；$\textcolor{red}{\frac{1}{10000^{2i/d}}}$实际上充当了 **<font color=red>不同的角频率</font>**，其中$\textcolor{red}{i}$用于索引embedding维度的奇偶，即$2i$和$2i+1$分别表示偶数位和奇数位的embedding索引，$i$越大，则角频率越小，即周期越长；$\textcolor{red}{d}$表示embedding的总维度数，即$d_{model}$。也就是说，对于embedding维度，**<font color=red>偶数索引应用位置编码的 sin 函数，奇数索引应用位置编码的 cos 函数</font>**。
+比如在$y=\sin(\omega x)$中，$\omega$是角频率，$x$是自变量，周期$T=2\pi/\omega$。在位置编码公式中，$\textcolor{red}{pos}$表示序列中某个单词的 **<font color=red>位置索引</font>**，可以理解为三角函数的自变量$x$；$\textcolor{red}{\frac{1}{10000^{2i/d}}}$实际上充当了 **<font color=red>不同的角频率</font>**，其中$\textcolor{red}{i}$用于索引embedding维度的奇偶，即$2i$和$2i+1$分别表示偶数位和奇数位的embedding索引，$i$越大，则角频率越小，即周期越长；$\textcolor{red}{d}$表示embedding的总维度数，即$d\_{model}$。也就是说，对于embedding维度，**<font color=red>偶数索引应用位置编码的 sin 函数，奇数索引应用位置编码的 cos 函数</font>**。
 
 例如“Are you OK ?”中的4个单词的 $pos$ ：Are对应了0；you对应了1；OK对应了2；?对应了3，下图的矩阵便是单词向量矩阵每个元素的位置编码，包含了4行，对应4个单词；每行有4列，对应4个维度。**<font color=red>从纵向来看，相同的维度具有相同的角频率</font>**，即$\omega$相同，位置$pos$则作为角频率为$\omega$的三角函数的自变量。**<font color=red>从横向来看，偶数索引的维度用正弦sin计算；奇数索引的维度用cos计算</font>**。
 
@@ -115,13 +114,13 @@ $$
 
 因此，Transformer原文中的位置编码，理论上当序列长度极大时，存在编码重复的情况。然而，实际中几乎不会出现这样的情况，基于以下几点：
 
-1. 在位置编码中，频率的选择是基于$\frac{1}{10000^{2i/d_{model}}}$，这些频率变化得非常缓慢，导致周期的最小公倍数变得非常大，从而减少了重复的可能性。  理论上$i$最高可以取值为$d_{model}/2$，此时$\omega$最小，即变化率最慢，周期最长，为$2\pi/\omega=2\pi*10000\approx62,831.85$。
+1. 在位置编码中，频率的选择是基于$\frac{1}{10000^{2i/d\_{model}}}$，这些频率变化得非常缓慢，导致周期的最小公倍数变得非常大，从而减少了重复的可能性。  理论上$i$最高可以取值为$d\_{model}/2$，此时$\omega$最小，即变化率最慢，周期最长，为$2\pi/\omega=2\pi\*10000\approx62,831.85$。
 2. 位置编码采用的频率并不是简单的整数倍数关系，因此周期的最小公倍数也会变得非常大。这样，序列必须非常长才可能遇到重复的位置编码。  
 
 ### 2.代码部分
 位置编码类的实现需说明一点：
 
-原文中提到：In addition, we apply dropout to the sums of the embeddings and the positional encodings in both the encoder and decoder stacks. For the base model, we use a rate of $P_{drop}=0.1$。即输入加上位置编码后，应用了dropout，且整个模型的基础dropout都设置为0.1。
+原文中提到：In addition, we apply dropout to the sums of the embeddings and the positional encodings in both the encoder and decoder stacks. For the base model, we use a rate of $P\_{drop}=0.1$。即输入加上位置编码后，应用了dropout，且整个模型的基础dropout都设置为0.1。
 
 **以下代码在实现位置编码时，没有加上这一dropout，而是在：[（四）4.完整的Transformer](#complete-transformer) 中才加入的。详细的注释均在代码中**：
 
@@ -217,14 +216,14 @@ plt.show()
 
 假设输入序列矩阵形状为 $n\times512$，其中 $n$ 是序列的 token 长度，512是 Embedding 的向量维度，若我们使用8个注意力头，那么8个头中的每一个头都只采用初始 Embedding 的向量长度 512 的 8 分之一来运算各自的 Attention，即通过把 Embedding 向量与$W^{Q}$，$W^{K}$，$W^{V}$三矩阵分别相乘之后，得到的向量长度为 64 维的向量。
 
-当然，每次 Embedding 向量乘的$W^{Q}$，$W^{K}$，$W^{V}$这三矩阵，都是不同的，所以，严谨地说，应该用 $W_{i}^{Q}$，$W_{i}^{K}$，$W_{i}^{V}$（ i = 8，即 head 数 ）来表达。即一个 $n\times512$ 的序列矩阵转换成了8个 $n\times64$ 的。
+当然，每次 Embedding 向量乘的$W^{Q}$，$W^{K}$，$W^{V}$这三矩阵，都是不同的，所以，严谨地说，应该用 $W\_{i}^{Q}$，$W\_{i}^{K}$，$W\_{i}^{V}$（ i = 8，即 head 数 ）来表达。即一个 $n\times512$ 的序列矩阵转换成了8个 $n\times64$ 的。
 
 所以，这相当于把 Embedding 向量作线性变换的同时，顺便把它“切”成了 8 份来运行。**<font color=red>当然，这样的“切”并不是直接在一个长度为 512 的向量上等分 8 份，而是通过与</font>**$W^{Q}$**<font color=red>，</font>**$W^{K}$**<font color=red>，</font>**$W^{V}$**<font color=red>三个矩阵分别相乘，线性变换而来的</font>**。【**平分会切断完整的Embedding信息，而通过线性变换来降维，每一个头都的信息都来自于原Embedding的所有维，每一个头都从细分的语义子空间中去捕捉相关性**】
 
 #### （1）单头注意力的过程
-1. 将一个输入序列中其中一个 token 的 Embedding 向量线性变换出来的$Q_{i}$向量（下图图例中为$Q_{2}$）与同一序列中其他所有 token 的 Embedding 向量线性变换出来的$K_{i}$向量进行比较，计算两者之间的语义关联度得分（即原始论文中所说的点积相似度）；
+1. 将一个输入序列中其中一个 token 的 Embedding 向量线性变换出来的$Q\_{i}$向量（下图图例中为$Q\_{2}$）与同一序列中其他所有 token 的 Embedding 向量线性变换出来的$K\_{i}$向量进行比较，计算两者之间的语义关联度得分（即原始论文中所说的点积相似度）；
 2. 将这些语义关联度得分转换为权重值，权重数值的大小在 0~1 之间，数值接近 1 代表权重高，即语义逻辑很紧密。数值接近 0 代表权重低，语义逻辑无关。所有权重数值的总和为 1，即 Softmax 归一化；
-3. 然后，把 Softmax 后的权重值与每个 token 的 Embedding 向量线性变换出来的$V_i$做加权和，最终生成结果$Z_i$（图例中为$Z_2$）
+3. 然后，把 Softmax 后的权重值与每个 token 的 Embedding 向量线性变换出来的$V\_i$做加权和，最终生成结果$Z\_i$（图例中为$Z\_2$）
 
 <div align="center"><img src="https://wkqpicture.oss-cn-beijing.aliyuncs.com/img/20260103110803654.webp" width="100%" alt="d65c67bc1ee3a24dc3702f6fc329dedb"></div>
 
@@ -232,7 +231,7 @@ plt.show()
 
 $$\text{Attention}\left(Q,K,V\right)=\text{Softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
 
-$d_{k}$为$K$矩阵的维度，$Q$与$K$使用同样的维度，在这里，若$d_{model}$为 512，则$d_{k}=d_{model}/h=64$，$d_{model}$为整个 Transformer 模型中所有子层和 Embedding 层的统一的输出维度。$h$为 head 数，默认为 8。
+$d\_{k}$为$K$矩阵的维度，$Q$与$K$使用同样的维度，在这里，若$d\_{model}$为 512，则$d\_{k}=d\_{model}/h=64$，$d\_{model}$为整个 Transformer 模型中所有子层和 Embedding 层的统一的输出维度。$h$为 head 数，默认为 8。
 
 #### （2）多头注意力的过程
  Attention 机制（下图中左侧部分为 Attention 机制的架构图）实际上是被分配到了 8 个头 head 之中去分别运行了。每一个头在各自运行之后，再通过 Concat 把得到的结果链接起来，然后再做一次线性变换，变回初始的形状。
@@ -251,18 +250,18 @@ $$\mathrm{where~head_i}=\mathrm{Attention}(QW_i^Q,KW_i^K,VW_i^V) \tag{②}$$
 
 $$\text{Attention}\left(Q,K,V\right)=\text{Softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V \tag{③}$$
 
- 其中，$W_i^Q\in\mathbb{R}^{d_{model}\times d_k},W_i^K\in\mathbb{R}^{d_{model}\times d_k},W_i^V\in\mathbb{R}^{d_{model}\times d_v}$，用于将原始序列矩阵$n \times d_{model}$映射为$n \times d_k$或$n \times d_v$；$W^{O}\in\mathbb{R}^{hd_{v}\times d_{\mathrm{model}}}$用于将拼接的多头转换为输出维度。
+ 其中，$W\_i^Q\in\mathbb{R}^{d\_{model}\times d\_k},W\_i^K\in\mathbb{R}^{d\_{model}\times d\_k},W\_i^V\in\mathbb{R}^{d\_{model}\times d\_v}$，用于将原始序列矩阵$n \times d\_{model}$映射为$n \times d\_k$或$n \times d\_v$；$W^{O}\in\mathbb{R}^{hd\_{v}\times d\_{\mathrm{model}}}$用于将拼接的多头转换为输出维度。
 
-【**<font color=red>注1</font>**】：$d_{model}$为整个 Transformer 模型中所有子层和 Embedding 层的输出维度，$d_{model} = 512$，$d_{k} = d_{q} = d_{model}/h = 64$，$d_{k}$与$d_{v}$在模型的执行阶段不用必须相等，可以取不同的值，$h$为 head 数，$h$默认为 8。
+【**<font color=red>注1</font>**】：$d\_{model}$为整个 Transformer 模型中所有子层和 Embedding 层的输出维度，$d\_{model} = 512$，$d\_{k} = d\_{q} = d\_{model}/h = 64$，$d\_{k}$与$d\_{v}$在模型的执行阶段不用必须相等，可以取不同的值，$h$为 head 数，$h$默认为 8。
 
-【**<font color=red>注2</font>**】：①②③公式中的$Q$、$K$、$V$容易混淆，①②中的$Q$、$K$、$V$是一种名义上的称呼，如下图中红圈部分，他们实际上都是序列矩阵$X$本身。当然，这里说的是自注意力，如果对于交叉注意力，他们则是属于不同的序列矩阵。因此②实际可以写为$\mathrm{head_i}=\mathrm{Attention}(XW_i^Q,XW_i^K,XW_i^V)$。而③中的$Q$、$K$、$V$，是$X$经过$W_i^Q,W_i^K,W_i^V$线性变换后的。
+【**<font color=red>注2</font>**】：①②③公式中的$Q$、$K$、$V$容易混淆，①②中的$Q$、$K$、$V$是一种名义上的称呼，如下图中红圈部分，他们实际上都是序列矩阵$X$本身。当然，这里说的是自注意力，如果对于交叉注意力，他们则是属于不同的序列矩阵。因此②实际可以写为$\mathrm{head\_i}=\mathrm{Attention}(XW\_i^Q,XW\_i^K,XW\_i^V)$。而③中的$Q$、$K$、$V$，是$X$经过$W\_i^Q,W\_i^K,W\_i^V$线性变换后的。
 
 <div align="center"><img src="https://wkqpicture.oss-cn-beijing.aliyuncs.com/img/20260103111903864.webp" width="70%" alt="QKV"></div>
 
 🔥**让我们走一个完整的例子：**
 
-1. 首先定义参数，假设序列的长度为$n$；Embedding为$d_{model}$，即序列矩阵$X$的形状为$n\times d_{model}$；注意力头数为$h$，则$d_k=d_q=d_{model}/h$【**<font color=red>因为二者相等，后面都用</font>**$d_k$**<font color=red>来表示</font>**】；$d_v$可以等于$d_k$、$d_q$，也可以不等于。
-2. 每个头都有一个$W_i^Q\in\mathbb{R}^{d_{model}\times d_k},W_i^K\in\mathbb{R}^{d_{model}\times d_k}$的矩阵将$X$线性变换为$Q_i,K_i$，即：
+1. 首先定义参数，假设序列的长度为$n$；Embedding为$d\_{model}$，即序列矩阵$X$的形状为$n\times d\_{model}$；注意力头数为$h$，则$d\_k=d\_q=d\_{model}/h$【**<font color=red>因为二者相等，后面都用</font>**$d\_k$**<font color=red>来表示</font>**】；$d\_v$可以等于$d\_k$、$d\_q$，也可以不等于。
+2. 每个头都有一个$W\_i^Q\in\mathbb{R}^{d\_{model}\times d\_k},W\_i^K\in\mathbb{R}^{d\_{model}\times d\_k}$的矩阵将$X$线性变换为$Q\_i,K\_i$，即：
 
     $$
     \begin{aligned}
@@ -271,19 +270,19 @@ $$\text{Attention}\left(Q,K,V\right)=\text{Softmax}\left(\frac{QK^T}{\sqrt{d_k}}
     \end{aligned}
     $$
 
-3. 将$Q_i$与$K_i^T$做点积，并进行 scale 和 softmax，即$softmax\left(\frac{Q_iK_i^T}{\sqrt{d_k}}\right)$，计算得到的相似度矩阵形状是$n\times n$。
-4. 类似第2步，$V_i$由下式而来：
+3. 将$Q\_i$与$K\_i^T$做点积，并进行 scale 和 softmax，即$softmax\left(\frac{Q\_iK\_i^T}{\sqrt{d\_k}}\right)$，计算得到的相似度矩阵形状是$n\times n$。
+4. 类似第2步，$V\_i$由下式而来：
 
     $$V_i=X{\times}W_i^V,~(V_i\in\mathbb{R}^{n\times d_v},X\in\mathbb{R}^{n\times d_{model}},W_i^V\in\mathbb{R}^{d_{model}\times d_v})$$
 
-    将第3步得到的相似度矩阵与$V_i$相乘，即得到 Attention 的结果，假设其为$Z_i$：
+    将第3步得到的相似度矩阵与$V\_i$相乘，即得到 Attention 的结果，假设其为$Z\_i$：
 
     $$Z_i=\text{Softmax}\left(\frac{Q_iK_i^T}{\sqrt{d_k}}\right)V_i,~(Z_i\in\mathbb{R}^{n\times d_v})$$
 
-    这里便得到了一个头的输出结果$Z_i$。
+    这里便得到了一个头的输出结果$Z\_i$。
 
-5. 以上2-4每个头都做一遍，产生$h$个$Z_i$，将他们拼接起来，得到$Z_{concat}\in\mathbb{R}^{n\times{hd_v}}$，然后使用$W^{O}\in\mathbb{R}^{hd_{v}\times d_{\mathrm{model}}}$将$Z_{concat}$变换成最终结果$Z\in\mathbb{R}^{n\times d_{model}}$，该输出形状与输入$X$形状相同。
-6. 一般情况下，$d_k$与$d_v$可设置为相同的，而$d_k$又由$d_{model}/h$得到，因此封装好后，只要设定注意力头数就好了。
+5. 以上2-4每个头都做一遍，产生$h$个$Z\_i$，将他们拼接起来，得到$Z\_{concat}\in\mathbb{R}^{n\times{hd\_v}}$，然后使用$W^{O}\in\mathbb{R}^{hd\_{v}\times d\_{\mathrm{model}}}$将$Z\_{concat}$变换成最终结果$Z\in\mathbb{R}^{n\times d\_{model}}$，该输出形状与输入$X$形状相同。
+6. 一般情况下，$d\_k$与$d\_v$可设置为相同的，而$d\_k$又由$d\_{model}/h$得到，因此封装好后，只要设定注意力头数就好了。
 
 ### 2.代码部分
 > **思考：** 在代码实现上，为什么初始化时，qkv的linear是(d_model, d_model)，而不是(d_model, d_k)？
@@ -302,7 +301,7 @@ Q_h &= XW_h^Q
 \end{aligned}
 $$
 
-其中$Q_i\in\mathbb{R}^{n\times d_k},X\in\mathbb{R}^{n\times d_{model}},W_i^Q\in\mathbb{R}^{d_{model}\times d_k}$，那么就有：
+其中$Q\_i\in\mathbb{R}^{n\times d\_k},X\in\mathbb{R}^{n\times d\_{model}},W\_i^Q\in\mathbb{R}^{d\_{model}\times d\_k}$，那么就有：
 
 $$Q=
 \begin{bmatrix}
@@ -312,8 +311,8 @@ X\begin{bmatrix}
 	W_1^Q\\W_2^Q\\\vdots\\W_h^Q
 \end{bmatrix}=XW^Q$$
 
-其中 $Q\in\mathbb{R}^{n\times{(h\times d_k)}}\Rightarrow Q\in\mathbb{R}^{n\times d_{model}},
-W^Q\in\mathbb{R}^{d_{model}\times{(h\times d_k)}}\Rightarrow W^Q\in\mathbb{R}^{d_{model}\times d_{model}}$，因此在代码实现上，直接定义了(d_model,d_model)的linear，一次性做了所有头的转换。
+其中 $Q\in\mathbb{R}^{n\times{(h\times d\_k)}}\Rightarrow Q\in\mathbb{R}^{n\times d\_{model}},
+W^Q\in\mathbb{R}^{d\_{model}\times{(h\times d\_k)}}\Rightarrow W^Q\in\mathbb{R}^{d\_{model}\times d\_{model}}$，因此在代码实现上，直接定义了(d_model,d_model)的linear，一次性做了所有头的转换。
 
 `MultiheadAttention`类的实现：
 
@@ -437,7 +436,7 @@ torch.Size([32, 8, 10, 10])
 ### 1.前馈神经网络和层归一化
 FeedForward 模块是一个简单的前馈神经网络，通常紧跟在多头注意力机制之后。它由两个线性层和一个激活函数组成，中间包含一个丢弃层（Dropout）以防止过拟合。
 
-在前馈神经网络中，每个神经元处理的是$d_{model}$维度，即每个时间步独立地应用相同的前馈网络，这种处理方式意味着前馈神经网络在处理某个位置时，并不会直接使用来自其他位置的信息。因此，原文中的表述是：**<font color=red>position-wise fully connected fee-forward network</font>**，这就是 position-wise 的含义。
+在前馈神经网络中，每个神经元处理的是$d\_{model}$维度，即每个时间步独立地应用相同的前馈网络，这种处理方式意味着前馈神经网络在处理某个位置时，并不会直接使用来自其他位置的信息。因此，原文中的表述是：**<font color=red>position-wise fully connected fee-forward network</font>**，这就是 position-wise 的含义。
 
 代码实现：
 
@@ -2274,4 +2273,3 @@ Predict chinese text: 这是最终的部分。
 7. [【Transformer系列】深入浅出理解Positional Encoding位置编码-CSDN博客](https://blog.csdn.net/m0_37605642/article/details/132866365)
 8. [手撕Transformer！！从每一模块原理讲解到代码实现【超详细!】](https://blog.csdn.net/xiaoh_7/article/details/140019530)
 9. [Transformer — PyTorch 2.3 documentation](https://pytorch.org/docs/2.3/generated/torch.nn.Transformer.html#torch.nn.Transformer)
-{% endraw %}

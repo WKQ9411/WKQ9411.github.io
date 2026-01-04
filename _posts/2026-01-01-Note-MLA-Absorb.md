@@ -4,6 +4,7 @@ title: 【笔记】MLA矩阵吸收分析
 date: 2026-01-01 16:00:00 +08:00
 summary: 详细分析MLA中的矩阵吸收计算方式。
 categories: Note
+excerpt_separator: <!--more-->
 ---
 
 {% raw %}
@@ -158,7 +159,7 @@ $$
 
 ### 4.1 比较顺序1和顺序2
 
-首先比较$\text{FLOPs}_{\text{order}_1}$和$\text{FLOPs}_{\text{order}_2}$，有：
+首先比较$\text{FLOPs}\_{\text{order}\_1}$和$\text{FLOPs}\_{\text{order}\_2}$，有：
 
 $$
 \text{FLOPs}_{\text{order}_1}-\text{FLOPs}_{\text{order}_2}=
@@ -180,7 +181,7 @@ $$
 
 ### 4.2 比较顺序2和顺序3
 
-然后比较$\text{FLOPs}_{\text{order}_2}$和$\text{FLOPs}_{\text{order}_3}$，有：
+然后比较$\text{FLOPs}\_{\text{order}\_2}$和$\text{FLOPs}\_{\text{order}\_3}$，有：
 
 $$
 \text{FLOPs}_{\text{order}_2}-\text{FLOPs}_{\text{order}_3}=
@@ -259,7 +260,7 @@ $$
 ## 4. 比较分析
 ### 4.1 比较顺序1和顺序2
 
-首先比较$\text{FLOPs}_{\text{order}_1}$和$\text{FLOPs}_{\text{order}_2}$，有：
+首先比较$\text{FLOPs}\_{\text{order}\_1}$和$\text{FLOPs}\_{\text{order}\_2}$，有：
 
 $$
 \text{FLOPs}_{\text{order}_1}-\text{FLOPs}_{\text{order}_2}=2bhvk(t-s)+2bhst(v-k)
@@ -277,7 +278,7 @@ $$
 
 ### 4.2 比较顺序2和顺序3
 
-然后比较$\text{FLOPs}_{\text{order}_2}$和$\text{FLOPs}_{\text{order}_3}$，有：
+然后比较$\text{FLOPs}\_{\text{order}\_2}$和$\text{FLOPs}\_{\text{order}\_3}$，有：
 
 $$
 \text{FLOPs}_{\text{order}_2}-\text{FLOPs}_{\text{order}_3}=2hvk(bs-e)+2bhse(v-k)

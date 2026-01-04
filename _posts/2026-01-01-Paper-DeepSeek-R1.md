@@ -4,6 +4,7 @@ title: 【论文解读】DeepSeek-R1
 date: 2026-01-01 16:00:00 +08:00
 summary: 解读DeepSeek-R1论文。
 categories: Paper
+excerpt_separator: <!--more-->
 ---
 
 {% raw %}

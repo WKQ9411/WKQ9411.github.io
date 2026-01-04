@@ -1,4 +1,3 @@
-{% raw %}
 ﻿---
 layout: post
 title: 【论文解读】DeepSeek-V3
@@ -46,13 +45,13 @@ DeepSeek-V3的基本架构如图所示：
 对于注意力机制，DeepSeek-V3采用了MLA架构。首先做出以下符号定义：
 
  - $d$ ：嵌入维度
- - $n_h$ ：注意力头数
- - $d_h$ ：每个注意力头的维度
- - $\mathbf{h}_t \in \mathbb{R}^d$ ：在给定注意力层中第 $t$ 个token的输入
+ - $n\_h$ ：注意力头数
+ - $d\_h$ ：每个注意力头的维度
+ - $\mathbf{h}\_t \in \mathbb{R}^d$ ：在给定注意力层中第 $t$ 个token的输入
 
 ### 1. 回顾多头注意力MHA
 
-多头注意力（Multi-Head Attention，MHA）首先通过三个矩阵 $W^Q, W^K, W^V \in \mathbb{R}^{d_h n_h \times d}$ 分别产生 $\mathbf{q}_t, \mathbf{k}_t, \mathbf{v}_t \in \mathbb{R}^{d_h n_h}$ ：
+多头注意力（Multi-Head Attention，MHA）首先通过三个矩阵 $W^Q, W^K, W^V \in \mathbb{R}^{d\_h n\_h \times d}$ 分别产生 $\mathbf{q}\_t, \mathbf{k}\_t, \mathbf{v}\_t \in \mathbb{R}^{d\_h n\_h}$ ：
 
 $$
 \begin{align}
@@ -62,7 +61,7 @@ $$
 \end{align}
 $$
 
-$\mathbf{q}_t, \mathbf{k}_t, \mathbf{v}_t$ 将会划分成 $n_h$ 个注意力头来执行多头注意力计算：
+$\mathbf{q}\_t, \mathbf{k}\_t, \mathbf{v}\_t$ 将会划分成 $n\_h$ 个注意力头来执行多头注意力计算：
 
 $$
 \begin{align}
@@ -76,11 +75,11 @@ $$
 
 其中：
 
- - $\mathbf{q}_{t,i}, \mathbf{k}_{t,i}, \mathbf{v}_{t,i} \in \mathbb{R}^{d_h}$ ：`query` `key` `value` 的第 $i$ -th 个注意力头
- - $W^O \in \mathbb{R}^{d \times d_h n_h}$ ：输出投影矩阵
- - $\text{Softmax}_j$ ：对位置 $j=1$ 到 $t$ 的注意力权重进行归一化
+ - $\mathbf{q}\_{t,i}, \mathbf{k}\_{t,i}, \mathbf{v}\_{t,i} \in \mathbb{R}^{d\_h}$ ：`query` `key` `value` 的第 $i$ -th 个注意力头
+ - $W^O \in \mathbb{R}^{d \times d\_h n\_h}$ ：输出投影矩阵
+ - $\text{Softmax}\_j$ ：对位置 $j=1$ 到 $t$ 的注意力权重进行归一化
 
-在推理阶段，所有的 `keys` `values` 需要被缓存，从而加速推理。因此MHA需要对**每个token**缓存 $2n_h d_h l$ （ $l$ 为模型的层数），过大的 `KV Cache` 严重限制了模型的 `batch size` 和 `sequence length` 。
+在推理阶段，所有的 `keys` `values` 需要被缓存，从而加速推理。因此MHA需要对**每个token**缓存 $2n\_h d\_h l$ （ $l$ 为模型的层数），过大的 `KV Cache` 严重限制了模型的 `batch size` 和 `sequence length` 。
 
 ### 2. 低秩KV联合压缩
 
@@ -96,12 +95,12 @@ $$
 
 其中：
 
- - $\mathbf{c}_t^{KV} \in \mathbb{R}^{d_c}$ ： `keys` 和 `values` 的压缩潜在向量
- - $d_c (\ll d_h n_h)$ ：KV压缩维度
- - $W^{DKV} \in \mathbb{R}^{d_c \times d}$ ：下投影矩阵
- - $W^{UK}, W^{UV} \in \mathbb{R}^{d_h n_h \times d_c}$ ： `keys` 和 `values` 的上投影矩阵
+ - $\mathbf{c}\_t^{KV} \in \mathbb{R}^{d\_c}$ ： `keys` 和 `values` 的压缩潜在向量
+ - $d\_c (\ll d\_h n\_h)$ ：KV压缩维度
+ - $W^{DKV} \in \mathbb{R}^{d\_c \times d}$ ：下投影矩阵
+ - $W^{UK}, W^{UV} \in \mathbb{R}^{d\_h n\_h \times d\_c}$ ： `keys` 和 `values` 的上投影矩阵
 
-在推理时，MLA仅需要对 $\color{red}{\mathbf{c}_t^{KV}}$ 进行缓存，每个token仅需缓存 $d_c l$ 个元素，从而使 `KV Cache` 显著减少，同时保持与标准多头注意力（MHA）相当的性能。
+在推理时，MLA仅需要对 $\color{red}{\mathbf{c}\_t^{KV}}$ 进行缓存，每个token仅需缓存 $d\_c l$ 个元素，从而使 `KV Cache` 显著减少，同时保持与标准多头注意力（MHA）相当的性能。
 
 下图对比了多头注意力（MHA），分组查询注意力（GQA），多查询注意力（MQA）和多头潜在注意力（MLA）的区别。
 
@@ -118,9 +117,9 @@ $$
 
 其中：
 
- - $\mathbf{c}_t^Q \in \mathbb{R}^{d_c'}$ ：`queries` 的压缩潜在向量
- - $d_c' (\ll d_h n_h)$ ：Q压缩维度
- - $W^{DQ} \in \mathbb{R}^{d_c' \times d}$, $W^{UQ} \in \mathbb{R}^{d_h n_h \times d_c'}$ ：`queries` 的下投影和上投影矩阵
+ - $\mathbf{c}\_t^Q \in \mathbb{R}^{d\_c'}$ ：`queries` 的压缩潜在向量
+ - $d\_c' (\ll d\_h n\_h)$ ：Q压缩维度
+ - $W^{DQ} \in \mathbb{R}^{d\_c' \times d}$, $W^{UQ} \in \mathbb{R}^{d\_h n\_h \times d\_c'}$ ：`queries` 的下投影和上投影矩阵
 
 下图更进一步对比了MHA和MLA之间的差异：
 
@@ -138,7 +137,7 @@ $$
 \end{align}
 $$
 
-其中，$\mathbf{k}_{t,i}^C \in \mathbb{R}^{d_h}$ 是每一个注意力头在执行注意力计算时的 `key` 。进一步，可以写为：
+其中，$\mathbf{k}\_{t,i}^C \in \mathbb{R}^{d\_h}$ 是每一个注意力头在执行注意力计算时的 `key` 。进一步，可以写为：
 
 $$
 \begin{align}
@@ -146,7 +145,7 @@ $$
 \end{align}
 $$
 
-其中，$W_i^{UK} \in \mathbb{R}^{d_h \times d_c}$ 。转换成多头的过程，可以看作是矩阵的拼接计算，因此可将多头看作是 $W^{UK}$ 划分为多个 $W_i^{UK}$ 并与 $\mathbf{c}_t^{KV}$ 相乘得到的，每个头的 `query` 和 `value` 的计算过程也类似。下图描述了这个过程：
+其中，$W\_i^{UK} \in \mathbb{R}^{d\_h \times d\_c}$ 。转换成多头的过程，可以看作是矩阵的拼接计算，因此可将多头看作是 $W^{UK}$ 划分为多个 $W\_i^{UK}$ 并与 $\mathbf{c}\_t^{KV}$ 相乘得到的，每个头的 `query` 和 `value` 的计算过程也类似。下图描述了这个过程：
 
 <div align="center"><img src="https://wkqpicture.oss-cn-beijing.aliyuncs.com/img/20260104003909897.png" width="100%" alt="多头.png-86.7kB"></div>
 
@@ -177,9 +176,9 @@ $$
 \end{align}
 $$
 
-由此发现，$W_i^{UK}$ 被吸收到 $W_i^{UQ}$ 中。原文中所说 $W^{UK}$ 被吸收到 $W^Q$ 可以理解为一种概念表示，而我们这里所推导的则是具体到一个注意力头了。此外，原文之所以用 $W^Q$ ，是因为原文在叙述这里时，还未讲到对 `query` 也要用低秩压缩，在 `query` 使用低秩压缩后，实际上就是**被吸收到 $W^{UQ}$ 了**。
+由此发现，$W\_i^{UK}$ 被吸收到 $W\_i^{UQ}$ 中。原文中所说 $W^{UK}$ 被吸收到 $W^Q$ 可以理解为一种概念表示，而我们这里所推导的则是具体到一个注意力头了。此外，原文之所以用 $W^Q$ ，是因为原文在叙述这里时，还未讲到对 `query` 也要用低秩压缩，在 `query` 使用低秩压缩后，实际上就是**被吸收到 $W^{UQ}$ 了**。
 
-> $W_i^{UK} \in \mathbb{R}^{d_h \times d_c}$ 和 $W_i^{UQ} \in \mathbb{R}^{d_h \times d_c'}$ 都是静态参数，他们相乘后得到新的 ${W_i^{UQ'}}^\top \in \mathbb{R}^{d_c' \times d_c}$，因此，在得到潜在向量 $\mathbf{c}_t^{Q}$ 和 $\mathbf{c}_j^{KV}$ 后，可直接通过 ${\mathbf{c}_t^{Q}}^\top {W_i^{UQ'}}^\top \mathbf{c}_j^{KV} = (W_i^{UQ'} \mathbf{c}_t^{Q})^\top \mathbf{c}_j^{KV}$ 来计算注意力分数，而无需再计算 `key` ，从而减小了计算开销。这里的 $W_i^{UQ'}$ 是模型的训练参数，与位置无关，由此也引出为什么在加入RoPE后，会因耦合而导致 $W^{UK}$ 无法被吸收的问题，在第3节[解耦RoPE](#3-解耦rope)中进一步说明。
+> $W\_i^{UK} \in \mathbb{R}^{d\_h \times d\_c}$ 和 $W\_i^{UQ} \in \mathbb{R}^{d\_h \times d\_c'}$ 都是静态参数，他们相乘后得到新的 ${W\_i^{UQ'}}^\top \in \mathbb{R}^{d\_c' \times d\_c}$，因此，在得到潜在向量 $\mathbf{c}\_t^{Q}$ 和 $\mathbf{c}\_j^{KV}$ 后，可直接通过 ${\mathbf{c}\_t^{Q}}^\top {W\_i^{UQ'}}^\top \mathbf{c}\_j^{KV} = (W\_i^{UQ'} \mathbf{c}\_t^{Q})^\top \mathbf{c}\_j^{KV}$ 来计算注意力分数，而无需再计算 `key` ，从而减小了计算开销。这里的 $W\_i^{UQ'}$ 是模型的训练参数，与位置无关，由此也引出为什么在加入RoPE后，会因耦合而导致 $W^{UK}$ 无法被吸收的问题，在第3节[解耦RoPE](#3-解耦rope)中进一步说明。
 
 对于公式 $\eqref{eq:2}$ ，可进一步得到：
 
@@ -193,7 +192,7 @@ $$
 \end{equation}
 $$
 
-其中，$\alpha_{j,i}$ 表示在第 $i$ 个注意力头中，当前位置 $t$ 对位置 $j$ 计算得到的注意力权重。$\mathbf{o}_{t,i}$ 为每个注意力头的输出向量。因此，最终的输出为：
+其中，$\alpha\_{j,i}$ 表示在第 $i$ 个注意力头中，当前位置 $t$ 对位置 $j$ 计算得到的注意力权重。$\mathbf{o}\_{t,i}$ 为每个注意力头的输出向量。因此，最终的输出为：
 
 $$
 \begin{equation}
@@ -209,19 +208,19 @@ $$
 
 其中：
 
- - $W^O \in \mathbb{R}^{d \times d_h n_h}$
- - $W_i^O \in \mathbb{R}^{d \times d_h}$
- - $W_i^{UV} \in \mathbb{R}^{d_h \times d_c}$
- - $W_i^{O'} = W_i^O W_i^{UV} \in \mathbb{R}^{d \times d_c}$
- - $W^{O'} \in \mathbb{R}^{d \times d_c n_h}$
- - $\mathbf{u}_t \in \mathbb{R}^{d}$
+ - $W^O \in \mathbb{R}^{d \times d\_h n\_h}$
+ - $W\_i^O \in \mathbb{R}^{d \times d\_h}$
+ - $W\_i^{UV} \in \mathbb{R}^{d\_h \times d\_c}$
+ - $W\_i^{O'} = W\_i^O W\_i^{UV} \in \mathbb{R}^{d \times d\_c}$
+ - $W^{O'} \in \mathbb{R}^{d \times d\_c n\_h}$
+ - $\mathbf{u}\_t \in \mathbb{R}^{d}$
 
 > 至此，可以看出 $W^{UV}$ 也被吸收进 $W^O$ ，形成了新的 $W^{O'}$ ，在计算注意力权重后，也无需再计算 `value` 了，直接使用 $W^{O'}$ 进行线性转换即可。
 
 
 ### 3. 解耦RoPE
 
-RoPE（Rotary Position Embedding） 的核心思想是通过复数域旋转操作将位置信息编码到 `query` 和 `key` 向量中。具体来说，对于位置为 $m$ 的向量 $\mathbf{q}_m$ 和位置为 $n$ 的向量 $\mathbf{k}_n$，RoPE通过旋转矩阵 $\mathbf{R}_m$ 和 $\mathbf{R}_n$ 对它们进行变换：
+RoPE（Rotary Position Embedding） 的核心思想是通过复数域旋转操作将位置信息编码到 `query` 和 `key` 向量中。具体来说，对于位置为 $m$ 的向量 $\mathbf{q}\_m$ 和位置为 $n$ 的向量 $\mathbf{k}\_n$，RoPE通过旋转矩阵 $\mathbf{R}\_m$ 和 $\mathbf{R}\_n$ 对它们进行变换：
 
 $$
 \begin{equation}
@@ -229,7 +228,7 @@ $$
 \end{equation}
 $$
 
-其中，旋转矩阵 $\mathbf{R}_m \in \mathbb{R}^{d_h n_h \times d_h n_h}$ 的形式为**分块对角矩阵**，每个分块对应二维旋转：
+其中，旋转矩阵 $\mathbf{R}\_m \in \mathbb{R}^{d\_h n\_h \times d\_h n\_h}$ 的形式为**分块对角矩阵**，每个分块对应二维旋转：
 
 
 $$
@@ -252,7 +251,7 @@ $$
 
 这意味着注意力机制仅依赖相对位置 $m-n$，而非绝对位置。关于RoPE，具体见[【手撕系列】手撕Llama3](/2026-01-01/Code-Llama3.html#二旋转位置编码rope)。
 
-RoPE与低秩KV压缩不兼容，具体来说，RoPE对 `query` 和 `key` 是位置敏感的，如果直接对 $\mathbf{k}_t^C$ 应用RoPE，那么公式 $\eqref{eq:1}$ 中的 $W^{UK}$ 将会耦合一个位置敏感的RoPE矩阵，从而导致 $W^{UK}$ 无法被 $W^{UQ}$ 吸收。
+RoPE与低秩KV压缩不兼容，具体来说，RoPE对 `query` 和 `key` 是位置敏感的，如果直接对 $\mathbf{k}\_t^C$ 应用RoPE，那么公式 $\eqref{eq:1}$ 中的 $W^{UK}$ 将会耦合一个位置敏感的RoPE矩阵，从而导致 $W^{UK}$ 无法被 $W^{UQ}$ 吸收。
 
 仍然具体到第 $i$ 个注意力头，当位置为 $m$ 的token对位置为 $n$ 的token执行注意力计算时，首先应用RoPE，有：
 
@@ -263,7 +262,7 @@ $$
 \end{align}
 $$
 
-其中，$\mathbf{R}_{t,i} \in \mathbb{R}^{d_h \times d_h}$ 是位置 $t$ 的旋转矩阵对应第 $i$ 个注意力头的子分块对角矩阵。在计算注意力分数时，有：
+其中，$\mathbf{R}\_{t,i} \in \mathbb{R}^{d\_h \times d\_h}$ 是位置 $t$ 的旋转矩阵对应第 $i$ 个注意力头的子分块对角矩阵。在计算注意力分数时，有：
 
 $$
 \begin{equation}
@@ -275,13 +274,13 @@ $$
 \end{equation}
 $$
 
-可见，${W_i^{UQ}}^\top$ 和 $W_i^{UK}$ 之间有了 $\mathbf{R}_{m-n,i}$ 用于引入相对位置关系，进而导致 ${W_i^{UQ}}^\top$ 无法吸收 $W_i^{UK}$ ，无法被吸收就意味着我们缓存的 $\mathbf{c}_t^{KV}$ 仍然需要按照原先的方式首先计算出 `key`，再执行注意力计算，这很影响计算效率。
+可见，${W\_i^{UQ}}^\top$ 和 $W\_i^{UK}$ 之间有了 $\mathbf{R}\_{m-n,i}$ 用于引入相对位置关系，进而导致 ${W\_i^{UQ}}^\top$ 无法吸收 $W\_i^{UK}$ ，无法被吸收就意味着我们缓存的 $\mathbf{c}\_t^{KV}$ 仍然需要按照原先的方式首先计算出 `key`，再执行注意力计算，这很影响计算效率。
 
 > 这就是原文中：In this way, $W^{UK}$ cannot be absorbed into $W^Q$ any more during inference, since a RoPE matrix related to the currently generating token will lie between $W^Q$ and $W^{UK}$ and matrix multiplication does not obey a commutative law. 这里原文仍使用的是不能被 $W^Q$ 吸收，但我们的推导是按照 `query` 也使用低秩压缩而来的。
 
 ---
 
-为了解决这个问题，DeepSeek为MLA应用了解耦RoPE的策略，即使用**额外的多头** $\mathbf{q}_{t,i}^R \in \mathbb{R}^{d_h^R}$ 和**共享的** $\mathbf{k}_t^R \in \mathbb{R}^{d_h^R}$ 来携带RoPE。其中，$d_h^R$ 表示解耦的 `query` 和 `key` 的每个头的维度。应用解耦RoPE策略的MLA可以用下面的公式来表示：
+为了解决这个问题，DeepSeek为MLA应用了解耦RoPE的策略，即使用**额外的多头** $\mathbf{q}\_{t,i}^R \in \mathbb{R}^{d\_h^R}$ 和**共享的** $\mathbf{k}\_t^R \in \mathbb{R}^{d\_h^R}$ 来携带RoPE。其中，$d\_h^R$ 表示解耦的 `query` 和 `key` 的每个头的维度。应用解耦RoPE策略的MLA可以用下面的公式来表示：
 
 $$
 \begin{align}
@@ -295,17 +294,17 @@ $$
 $$
 其中：
 
- - $W^{QR} \in \mathbb{R}^{d_h^R n_h \times d_c'}$ ：用于产生解耦 `queries`
- - $W^{KR} \in \mathbb{R}^{d_h^R \times d}$ ：用于产生解耦 `key`
+ - $W^{QR} \in \mathbb{R}^{d\_h^R n\_h \times d\_c'}$ ：用于产生解耦 `queries`
+ - $W^{KR} \in \mathbb{R}^{d\_h^R \times d}$ ：用于产生解耦 `key`
  - $\text{RoPE}(\cdot)$ ：应用旋转位置编码
  - $[ \cdot ; \cdot ]$ ：拼接操作
- - $\mathbf{q}_{t,i}, \mathbf{k}_{t,i} \in \mathbb{R}^{d_h+d_h^R}$
+ - $\mathbf{q}\_{t,i}, \mathbf{k}\_{t,i} \in \mathbb{R}^{d\_h+d\_h^R}$
 
-简单来说，$[\mathbf{q}_{t,i}^C; \mathbf{q}_{t,i}^R]$ 是各个头拼接各自的解耦 `queries` ，$[\mathbf{k}_{t,i}^C; \mathbf{k}_t^R]$ 是各个头拼接共享的解耦 `key` 。在推理阶段，解耦 `key` $\color{red}{\mathbf{k}_t^R}$ 也需要被缓存，因此，每个token的`KV Cahe` 一共需要缓存 $(d_c + d_h^R) l$ 个元素。
+简单来说，$[\mathbf{q}\_{t,i}^C; \mathbf{q}\_{t,i}^R]$ 是各个头拼接各自的解耦 `queries` ，$[\mathbf{k}\_{t,i}^C; \mathbf{k}\_t^R]$ 是各个头拼接共享的解耦 `key` 。在推理阶段，解耦 `key` $\color{red}{\mathbf{k}\_t^R}$ 也需要被缓存，因此，每个token的`KV Cahe` 一共需要缓存 $(d\_c + d\_h^R) l$ 个元素。
 
 ---
 
-> 【思考】（1）为什么解耦 `queries` 是多头的，而解耦 `key` 是共享的？（2）为什么解耦 `queries` 由 $\mathbf{c}_t^Q$ 计算得到，而解耦 `key` 直接由 $\mathbf{h}_t$ 计算得到？
+> 【思考】（1）为什么解耦 `queries` 是多头的，而解耦 `key` 是共享的？（2）为什么解耦 `queries` 由 $\mathbf{c}\_t^Q$ 计算得到，而解耦 `key` 直接由 $\mathbf{h}\_t$ 计算得到？
 
 `以下分析源于个人理解`
 
@@ -320,10 +319,10 @@ $$
 
 对于问题（2），可能的原因有以下几点：
 
- - 为什么解耦 `queries` 由 $\mathbf{c}_t^Q$ 计算得到：
-    - 通过低秩压缩 $\mathbf{c}_t^Q$ 减少计算量，具有更关键、更高层的语义表示；
- - 为什么解耦 `key` 直接由 $\mathbf{h}_t$ 计算得到：
-    - 原始隐藏状态 $\mathbf{h}_t$ 包含完整的语义和位置信息，直接通过 $W^{KR}$ 映射会牺牲一定压缩率，但可保留RoPE对位置的高保真编码，避免低秩压缩引入的信息损失。
+ - 为什么解耦 `queries` 由 $\mathbf{c}\_t^Q$ 计算得到：
+    - 通过低秩压缩 $\mathbf{c}\_t^Q$ 减少计算量，具有更关键、更高层的语义表示；
+ - 为什么解耦 `key` 直接由 $\mathbf{h}\_t$ 计算得到：
+    - 原始隐藏状态 $\mathbf{h}\_t$ 包含完整的语义和位置信息，直接通过 $W^{KR}$ 映射会牺牲一定压缩率，但可保留RoPE对位置的高保真编码，避免低秩压缩引入的信息损失。
 
 此外，将注意力权重部分进一步细化，得到下面的推导：
 
@@ -339,9 +338,9 @@ $$
 \end{equation}
 $$
 
-第一项为低秩语义交互 ${\mathbf{c}_t^{Q}}^\top ({W_i^{UQ}}^\top W_i^{UK}) \mathbf{c}_j^{KV}$ ，它计算了潜在向量之间的联系，完全独立于位置编码，通过矩阵吸收，优化了计算效率。
+第一项为低秩语义交互 ${\mathbf{c}\_t^{Q}}^\top ({W\_i^{UQ}}^\top W\_i^{UK}) \mathbf{c}\_j^{KV}$ ，它计算了潜在向量之间的联系，完全独立于位置编码，通过矩阵吸收，优化了计算效率。
 
-第二项为位置敏感交互 ${\mathbf{c}_t^{Q}}^\top ({W_i^{QR}}^\top \mathbf{R}_{t-j,i} W^{KR}) \mathbf{h}_j$ ，将RoPE限制在解耦 `queries` 和解耦 `key` 的交互中，避免与低秩压缩参数耦合。
+第二项为位置敏感交互 ${\mathbf{c}\_t^{Q}}^\top ({W\_i^{QR}}^\top \mathbf{R}\_{t-j,i} W^{KR}) \mathbf{h}\_j$ ，将RoPE限制在解耦 `queries` 和解耦 `key` 的交互中，避免与低秩压缩参数耦合。
 
 ---
 
@@ -427,7 +426,7 @@ $$
 \mathbf{u}_t &= W^O [\mathbf{o}_{t,1}; \mathbf{o}_{t,2}; \ldots; \mathbf{o}_{t,n_h}]
 \end{align}
 $$
-其中，在DeepSeek-V2中，$d_c$ 设置为 $4d_h$ ，$d_h^R$ 设置为 $\frac{d_h}{2}$ 。
+其中，在DeepSeek-V2中，$d\_c$ 设置为 $4d\_h$ ，$d\_h^R$ 设置为 $\frac{d\_h}{2}$ 。
 
 再次对比原图，进一步理解这个过程：
 
@@ -444,7 +443,7 @@ $$
  - 使用更细粒度的专家，以实现更高的专业化和更准确的知识获取
  - 分离出一些专家作为共享专家，以减少路由专家之间的知识冗余
 
-令 $\mathbf{u}_t$ 为第 $t$ 个token的FFN输入，通过下面的公式来计算FFN的输出 $\mathbf{h}_t'$ ：
+令 $\mathbf{u}\_t$ 为第 $t$ 个token的FFN输入，通过下面的公式来计算FFN的输出 $\mathbf{h}\_t'$ ：
 
 
 $$
@@ -462,12 +461,12 @@ $$
 
 其中：
 
- - $N_s$ 和 $N_r$ ：共享专家/路由专家的数量
- - $\text{FFN}_i^{(s)}(\cdot)$ 和 $\text{FFN}_i^{(r)}(\cdot)$ ：第 $i$ 个共享专家/路由专家
- - $K_r$ ：激活的路由专家数量
- - $g_{i,t}$ ：第 $i$ 个专家的门控值，决定了第 $i$ 个路由专家在最终FFN输出中所占的权重【注意：这是在选出的topk得分内进行归一化而得到的】
- - $s_{i,t}$ ：token与专家之间的亲和度，即某个token被分配给某个专家的概率或权重
- - $\mathbf{e}_i$ ：第 $i$ 个路由专家的质心向量，用于衡量token和专家的匹配程度
+ - $N\_s$ 和 $N\_r$ ：共享专家/路由专家的数量
+ - $\text{FFN}\_i^{(s)}(\cdot)$ 和 $\text{FFN}\_i^{(r)}(\cdot)$ ：第 $i$ 个共享专家/路由专家
+ - $K\_r$ ：激活的路由专家数量
+ - $g\_{i,t}$ ：第 $i$ 个专家的门控值，决定了第 $i$ 个路由专家在最终FFN输出中所占的权重【注意：这是在选出的topk得分内进行归一化而得到的】
+ - $s\_{i,t}$ ：token与专家之间的亲和度，即某个token被分配给某个专家的概率或权重
+ - $\mathbf{e}\_i$ ：第 $i$ 个路由专家的质心向量，用于衡量token和专家的匹配程度
  - $\text{Topk}(\cdot, K)$ ：在第 $t$ 个token和所有专家计算的亲和度分数中，选择 $K$ 个最高的
 
 与DeepSeek-V2不同的是，DeepSeek-V3使用**Sigmoid函数**来计算亲和度分数，然后在所有选择出的亲和度分数中使用了归一化，从而产生门控值。
@@ -487,7 +486,7 @@ $$
 
 <div align="center"><img src="https://wkqpicture.oss-cn-beijing.aliyuncs.com/img/20260104003910533.png" width="100%" alt="image-20250329215459769"></div>
 
-具体来说，为每个专家引入一个偏置项 $b_i$ ，并将其与对应的亲和度分数 $s_{i,t}$ 相加，从而选出top-K路由：
+具体来说，为每个专家引入一个偏置项 $b\_i$ ，并将其与对应的亲和度分数 $s\_{i,t}$ 相加，从而选出top-K路由：
 
 $$
 \begin{equation}
@@ -499,7 +498,7 @@ s_{i,t}, & s_{i,t} + b_i \in \text{Topk}(\{s_{j,t} + b_j | 1 \leq j \leq N_r\}, 
 \end{equation}
 $$
 
-注意，偏置项 $b_i$ 仅用于路由，与FFN输出相乘的门控值仍然来源于原始的亲和度分数 $s_{i,t}$ 。在训练过程中，持续监控每个step **整个batch** 的专家负载，在每个step最后，如果对应的专家过载，则对 $b_i$ 减少 $\gamma$ ，如果对应的专家负载不足，则对 $b_i$ 增加 $\gamma$ ，其中 $\gamma$ 是一个称为偏置更新速度的超参数。通过动态调整，DeepSeek-V3在训练过程中保持均衡的专家负载，比仅通过纯辅助损失鼓励负载均衡的模型性能更好。
+注意，偏置项 $b\_i$ 仅用于路由，与FFN输出相乘的门控值仍然来源于原始的亲和度分数 $s\_{i,t}$ 。在训练过程中，持续监控每个step **整个batch** 的专家负载，在每个step最后，如果对应的专家过载，则对 $b\_i$ 减少 $\gamma$ ，如果对应的专家负载不足，则对 $b\_i$ 增加 $\gamma$ ，其中 $\gamma$ 是一个称为偏置更新速度的超参数。通过动态调整，DeepSeek-V3在训练过程中保持均衡的专家负载，比仅通过纯辅助损失鼓励负载均衡的模型性能更好。
 
 其算法流程如下图所示，图中的Eq.(3)即上式：
 
@@ -523,16 +522,16 @@ $$
  - $\alpha$ ：平衡因子，会被设置为一个非常小的值
  - $\mathbb{I}(\cdot)$ ：指标函数，若符合括号中的情况，则记为1，不符合则记为0
  - $T$ ：序列中的token数
- - $s_{i,t}'$ ：第 $t$ 个token在第 $i$ 个专家上的归一化亲和度得分【注意：与gate不同，这是对所有的得分进行归一化】
- - $P_i$ ：第 $i$ 个专家**在每个token上的归一化亲和度得分均值**
- - $\mathbb{I}(s_{i,t} \in \text{Topk}(\{s_{j,t} \mid 1 \leq j \leq N_r\}, K_r))$ ：对于第 $i$ 个专家，若被第 $t$ 个token激活（是top-k之一），则记为1，否则记为0
- - $\frac{1}{T} \sum_{t=1}^{T} \mathbb{I}(s_{i,t} \in \text{Topk}(\{s_{j,t} \mid 1 \leq j \leq N_r\}, K_r))$ ：第 $i$ 个专家**在每个token上的平均激活次数**
- - $\frac{N_r}{K_r}$ ：缩放系数
- - $f_iP_i$ ：第 $i$ 个专家在每个token上的平均激活次数乘以平均得分
+ - $s\_{i,t}'$ ：第 $t$ 个token在第 $i$ 个专家上的归一化亲和度得分【注意：与gate不同，这是对所有的得分进行归一化】
+ - $P\_i$ ：第 $i$ 个专家**在每个token上的归一化亲和度得分均值**
+ - $\mathbb{I}(s\_{i,t} \in \text{Topk}(\{s\_{j,t} \mid 1 \leq j \leq N\_r\}, K\_r))$ ：对于第 $i$ 个专家，若被第 $t$ 个token激活（是top-k之一），则记为1，否则记为0
+ - $\frac{1}{T} \sum\_{t=1}^{T} \mathbb{I}(s\_{i,t} \in \text{Topk}(\{s\_{j,t} \mid 1 \leq j \leq N\_r\}, K\_r))$ ：第 $i$ 个专家**在每个token上的平均激活次数**
+ - $\frac{N\_r}{K\_r}$ ：缩放系数
+ - $f\_iP\_i$ ：第 $i$ 个专家在每个token上的平均激活次数乘以平均得分
 
-直观理解上， $P_i$ 可由调整模型权重来改变，而 $f_i$ 是由 $P_i$ 导致的客观结果，专家 $i$ 的得分大，自然被激活的次数就多。因此，若在一个序列中，各个token最终激活专家 $i$ 的频率 $f_i$ 很大，那么该专家的得分 $P_i$ 就应该减小，反之亦然，从而鼓励每个序列上的专家负载变得均衡。
+直观理解上， $P\_i$ 可由调整模型权重来改变，而 $f\_i$ 是由 $P\_i$ 导致的客观结果，专家 $i$ 的得分大，自然被激活的次数就多。因此，若在一个序列中，各个token最终激活专家 $i$ 的频率 $f\_i$ 很大，那么该专家的得分 $P\_i$ 就应该减小，反之亦然，从而鼓励每个序列上的专家负载变得均衡。
 
-此外，为防止激活的专家分布在过多的节点上，增加通信成本，还使用了**节点限制路由（Node-Limited Routing）**，即确保每个token最多只会被发送到M个节点。首先计算所有节点 $\frac{K_r}{M}$ 个最高亲和度分数之和，然后根据这些亲和度分数和，选则最大的M个节点。接下来，**在这M个节点上选择top-k个专家**，因此便能确定出最终 $K_r$ 个激活专家。
+此外，为防止激活的专家分布在过多的节点上，增加通信成本，还使用了**节点限制路由（Node-Limited Routing）**，即确保每个token最多只会被发送到M个节点。首先计算所有节点 $\frac{K\_r}{M}$ 个最高亲和度分数之和，然后根据这些亲和度分数和，选则最大的M个节点。接下来，**在这M个节点上选择top-k个专家**，因此便能确定出最终 $K\_r$ 个激活专家。
 
 ## （三）多token预测
 
@@ -544,9 +543,9 @@ $$
 
 ### 1. MTP模块
 
-DeepSeek-V3的MTP实现通过使用 $D$ 个序列模块来预测 $D$ 个额外tokens。这里需要提到一个概念：**预测深度**（Prediction Depth），预测深度为 $k$ ，表示模型在生成当前token时，能够预测后续第 $k$ 个token。每个预测深度对应了一个MTP模块，第 $k$ 个MTP模块包括一个共享Embedding层 $\text{Emb}(\cdot)$，一个共享输出头 $\text{OutHead}(\cdot)$，一个Transformer模块 $\text{TRM}_k(\cdot)$ 和一个投影矩阵 $M_k \in \mathbb{R}^{d \times 2d}$ 。
+DeepSeek-V3的MTP实现通过使用 $D$ 个序列模块来预测 $D$ 个额外tokens。这里需要提到一个概念：**预测深度**（Prediction Depth），预测深度为 $k$ ，表示模型在生成当前token时，能够预测后续第 $k$ 个token。每个预测深度对应了一个MTP模块，第 $k$ 个MTP模块包括一个共享Embedding层 $\text{Emb}(\cdot)$，一个共享输出头 $\text{OutHead}(\cdot)$，一个Transformer模块 $\text{TRM}\_k(\cdot)$ 和一个投影矩阵 $M\_k \in \mathbb{R}^{d \times 2d}$ 。
 
-对于输入的第 $i$ 个token $t_i$ ，在预测深度为 $k$ 时，首先通过投影矩阵融合第 $k-1$ 个预测深度的输出表征 $\mathbf{h}_i^{k-1} \in \mathbb{R}^d$ 和第 $i+k$ 个token的Embedding $\text{Emb}(t_{i+k}) \in \mathbb{R}^d$ ：
+对于输入的第 $i$ 个token $t\_i$ ，在预测深度为 $k$ 时，首先通过投影矩阵融合第 $k-1$ 个预测深度的输出表征 $\mathbf{h}\_i^{k-1} \in \mathbb{R}^d$ 和第 $i+k$ 个token的Embedding $\text{Emb}(t\_{i+k}) \in \mathbb{R}^d$ ：
 
 $$
 \begin{equation}
@@ -554,7 +553,7 @@ $$
 \end{equation}
 $$
 
-其中，$[\cdot ; \cdot]$ 表示拼接操作。特别的，当 $k=1$ 时，$\mathbf{h}_i^{k-1}$ 就是主模型的表征。另外，注意每个MTP模块的Embedding层和输出头，都是与主模型共享的。融合后的 $\mathbf{h}_i^{'k}$ 作为输入，输入到第 $k$ 个深度的Transformer模块中，产生输出表征 $\mathbf{h}_i^{k}$ ：
+其中，$[\cdot ; \cdot]$ 表示拼接操作。特别的，当 $k=1$ 时，$\mathbf{h}\_i^{k-1}$ 就是主模型的表征。另外，注意每个MTP模块的Embedding层和输出头，都是与主模型共享的。融合后的 $\mathbf{h}\_i^{'k}$ 作为输入，输入到第 $k$ 个深度的Transformer模块中，产生输出表征 $\mathbf{h}\_i^{k}$ ：
 
 $$
 \begin{equation}
@@ -562,9 +561,9 @@ $$
 \end{equation}
 $$
 
-其中，$T$ 表示输入的序列长度【构造数据时，根据使用的预测深度$k$来确定输入序列和输出序列，这里输入序列指$t_1$~$t_6$，而输出是$t_2$~$t_7$，因此输入序列长度$T$指的是6，如果预测深度$k=2$，那么主模型的输入前$6-2=4$个token作为输入，来预测下$k+1$个token，即$t_1$~$t_4$预测$t_4$~$t_7$】，下标 $i:j$ 表示切片操作，包括左右边界。这里相当于对输入序列**<font color='red'>从1到T-k</font>**的token，都进行了后面第 $k$ 个token的预测。
+其中，$T$ 表示输入的序列长度【构造数据时，根据使用的预测深度$k$来确定输入序列和输出序列，这里输入序列指$t\_1$~$t\_6$，而输出是$t\_2$~$t\_7$，因此输入序列长度$T$指的是6，如果预测深度$k=2$，那么主模型的输入前$6-2=4$个token作为输入，来预测下$k+1$个token，即$t\_1$~$t\_4$预测$t\_4$~$t\_7$】，下标 $i:j$ 表示切片操作，包括左右边界。这里相当于对输入序列**<font color='red'>从1到T-k</font>**的token，都进行了后面第 $k$ 个token的预测。
 
-最后，将 $\mathbf{h}_i^k$ 作为共享输出头的输入，共享输出头将会计算第 $k$ 个token预测词的概率分布 $p_{i+k+1}^k \in \mathbb{R}^V$ ，其中，$V$ 是词典的大小：
+最后，将 $\mathbf{h}\_i^k$ 作为共享输出头的输入，共享输出头将会计算第 $k$ 个token预测词的概率分布 $p\_{i+k+1}^k \in \mathbb{R}^V$ ，其中，$V$ 是词典的大小：
 
 $$
 \begin{equation}
@@ -587,14 +586,14 @@ $$
 其中：
 
  - $T$ ：输入序列长度
- - $t_i$ ：第 $i$ 个位置的ground truth token
- - $P_i^k[t_i]$ ：由第 $k$ 个MTP模块给出的对应 $t_i$ 的预测概率
+ - $t\_i$ ：第 $i$ 个位置的ground truth token
+ - $P\_i^k[t\_i]$ ：由第 $k$ 个MTP模块给出的对应 $t\_i$ 的预测概率
 
 >注意，这里的下标 $i$ 与上一小节的下标 $i$ 含义不同。
 >（1）例如，公式 $\eqref{eq:3}$ 中的下标 $i$ 是从**输入**的角度，表示当前token的位置，$i+k+1$ 表示预测深度为 $k$ 时预测输出的token的位置。如果 $k=0$ ，则表示仅做下一个字符预测，预测输出第 $i+1$ 个位置的token；如果 $k=1$ ，则表示做下两个字符预测，在第 $k=1$ 个MTP模块中，会预测输出第 $i+2$ 个位置的token。
 >（2）而本小节的 $i$ 是从**输出**的角度，表示当前预测输出的token的位置。当上一小节中的 $i$ 取 $1$ ，即输入序列的第 $1$ 个token时，输出对应第 $i+k+1=2+k$ 个token，也就成了本小节的 $i$ 从 $2+k$ 起算；当上一小节中的 $i$ 取 $T-k$ 时，输出对应第 $i+k+1=T+1$ ，也就成了本小节的 $i$ 到 $T+1$ 终止。 
 
-最后，在所有MTP模块上计算平均，并乘一个系数 $\lambda$ ，得到最终的MTP损失 $\mathcal{L}_{\text{MTP}}$ ：
+最后，在所有MTP模块上计算平均，并乘一个系数 $\lambda$ ，得到最终的MTP损失 $\mathcal{L}\_{\text{MTP}}$ ：
 
 $$
 \begin{equation}
@@ -667,13 +666,13 @@ $$
 
 其中：
 
- - $<\text{\|fim_begin\|}>$ ：标记FIM任务的开始
- - $<\text{\|fim_hole\|}>$ ：前缀和后缀之间的分隔符，表示确实部分
- - $<\text{\|fim_end\|}>$ ：标记FIM任务的结束
- - $<\text{\|eos_token\|}>$ ：标记序列的结束
- - $f_{\text{pre}}$ ：前缀部分
- - $f_{\text{suf}}$ ：后缀部分
- - $f_{\text{middle}}$ ：中间缺失的部分，即模型需要生成的内容
+ - $<\text{\|fim\_begin\|}>$ ：标记FIM任务的开始
+ - $<\text{\|fim\_hole\|}>$ ：前缀和后缀之间的分隔符，表示确实部分
+ - $<\text{\|fim\_end\|}>$ ：标记FIM任务的结束
+ - $<\text{\|eos\_token\|}>$ ：标记序列的结束
+ - $f\_{\text{pre}}$ ：前缀部分
+ - $f\_{\text{suf}}$ ：后缀部分
+ - $f\_{\text{middle}}$ ：中间缺失的部分，即模型需要生成的内容
 
 这一结构被应用于文档级别，作为预打包的一个部分，FIM结构的应用率为10%，即有10%的数据使用这一策略进行训练。
 
@@ -686,11 +685,11 @@ DeepSeek-V3采用字节级BPE，具有128k的扩展词汇。
  - Transformer Layers：61
  - Hidden Dimension：7168
  - MLA ：
-    - attention heads $n_h$ ：128
-    - per-head dimension $d_h$ ：128
-    - KV compression dimension $d_c$ ：512
-    - query compression dimension $d_c'$ ：1536
-    - per-head dimension of decoupled queries and key $d_h^R$ ：64
+    - attention heads $n\_h$ ：128
+    - per-head dimension $d\_h$ ：128
+    - KV compression dimension $d\_c$ ：512
+    - query compression dimension $d\_c'$ ：1536
+    - per-head dimension of decoupled queries and key $d\_h^R$ ：64
 
  - Each MoE Layer ：
     - 1 shared expert
@@ -706,8 +705,8 @@ DeepSeek-V3采用字节级BPE，具有128k的扩展词汇。
 ### 2. 训练超参数
 
 - AdamW ：
-    - $\beta_1$ ：0.9
-    - $\beta_2$ ：0.95
+    - $\beta\_1$ ：0.9
+    - $\beta\_2$ ：0.95
     - weight_decay ：0.1
 
 - max_seq_len in pre-training ：4k
@@ -735,7 +734,7 @@ DeepSeek-V3采用字节级BPE，具有128k的扩展词汇。
 
 在预训练之后，使用[YaRN](https://arxiv.org/pdf/2309.00071)进行上下文扩展，并执行两个额外的训练阶段，每个阶段包括1000个step，逐步将上下文窗口从4k扩展到32k再到128k。
 
-YaRN仅用于解耦共享 `key` $\mathbf{k}_t^R$ ，超参数在两个阶段保持相同，参数含义及原理具体参考YaRN论文：
+YaRN仅用于解耦共享 `key` $\mathbf{k}\_t^R$ ，超参数在两个阶段保持相同，参数含义及原理具体参考YaRN论文：
 
  - $s$ ：40
  - $\alpha$ ：1
@@ -799,4 +798,3 @@ RL训练完成后，通过拒绝采样（rejection sampling）从专家模型中
 
 1.   [陈巍：DeepSeek V3/R1的架构与训练技术2万字长文分析（上）](https://zhuanlan.zhihu.com/p/21208287743)
 2.   [陈巍：DeepSeek V3/R1的架构与训练技术2万字长文分析（下）](https://zhuanlan.zhihu.com/p/21755758234)
-{% endraw %}

@@ -4,6 +4,7 @@ title: 【手撕系列】手撕DeepSeek-V3
 date: 2026-01-01 16:00:00 +08:00
 summary: 从零手撕一个小参数量的DeepSeek-V3模型，包括MLA、MoE、负载均衡、MTP等实现，进行预训练和微调。
 categories: Code
+excerpt_separator: <!--more-->
 ---
 
 {% raw %}
@@ -147,19 +148,19 @@ class MLA(nn.Module):
 |                           变量含义                           |   代码中的变量   |                         论文中的变量                         |
 | :----------------------------------------------------------: | :--------------: | :----------------------------------------------------------: |
 |                           嵌入维度                           |       dim        |                             $d$                              |
-|                          注意力头数                          |     n_heads      |                            $n_h$                             |
-|     query的下投影维度，即潜在向量$\mathbf{c}_t^Q$的维度      |   q_lora_rank    |                            $d_c'$                            |
-| key / value的下投影维度，即潜在向量$\mathbf{c}_t^{KV}$的维度 |   kv_lora_rank   |                            $d_c$                             |
-| 不带位置编码部分（$\mathbf{q}_t^C,\mathbf{k}_t^C$）的**每个头**的维度 | qk_nope_head_dim |                            $d_h$                             |
-| 带位置编码部分（解耦的$\mathbf{q}_t^R,\mathbf{k}_t^R$）的**每个头**的维度 | qk_rope_head_dim |                           $d_h^R$                            |
-|   **最终**执行注意力计算的 query 和 key 的**每个头**的维度   |   qk_head_dim    |                         $d_h+d_h^R$                          |
-|         value的每个头的维度，论文中**也设为** $d_h$          |    v_head_dim    |                            $d_h$                             |
-|                     注意力计算的缩放因子                     |  softmax_scale   |                   $1/\sqrt{(d_h + d_h^R)}$                   |
-|          对原始向量执行$\mathbf{c}_t^Q$下投影的矩阵          |    self.wq_a     |             $W^{DQ}\in\mathbb{R}^{d_c'\times d}$             |
-| **同时**对$\mathbf{c}_t^Q$执行$\mathbf{q}_t^C$上投影（$W^{UQ}\in \mathbb{R}^{d_h n_h \times d_c'}$）和$\mathbf{q}_t^R$解耦（$W^{QR} \in \mathbb{R}^{d_h^R n_h \times d_c'}$）的矩阵 |    self.wq_b     | $[W^{UQ};W^{QR}]\in \mathbb{R}^{(d_h+d_h^R) n_h \times d_c'}$ |
-| **同时**对原始向量进行$\mathbf{c}_t^{KV}$下投影（$W^{DKV} \in \mathbb{R}^{d_c \times d}$）和$\mathbf{k}_t^R$解耦（$W^{KR} \in \mathbb{R}^{d_h^R \times d}$）的矩阵 |    self.wkv_a    |   $[W^{DKV};W^{KR}]\in \mathbb{R}^{(d_c+d_h^R) \times d}$    |
-| **同时**对$\mathbf{c}_t^{KV}$执行$\mathbf{k}_t^C$上投影（$W^{UK}\in \mathbb{R}^{d_h n_h \times d_c}$）和$\mathbf{v}_t^C$上投影（$W^{UV}\in \mathbb{R}^{d_h n_h \times d_c}$）的矩阵 |    self.wkv_b    |  $[W^{UK};W^{UV}]\in \mathbb{R}^{(d_h+d_h) n_h \times d_c}$  |
-|                       输出维度变换矩阵                       |     self.wo      |           $W^O \in \mathbb{R}^{d \times d_h n_h}$            |
+|                          注意力头数                          |     n_heads      |                            $n\_h$                             |
+|     query的下投影维度，即潜在向量$\mathbf{c}\_t^Q$的维度      |   q_lora_rank    |                            $d\_c'$                            |
+| key / value的下投影维度，即潜在向量$\mathbf{c}\_t^{KV}$的维度 |   kv_lora_rank   |                            $d\_c$                             |
+| 不带位置编码部分（$\mathbf{q}\_t^C,\mathbf{k}\_t^C$）的**每个头**的维度 | qk_nope_head_dim |                            $d\_h$                             |
+| 带位置编码部分（解耦的$\mathbf{q}\_t^R,\mathbf{k}\_t^R$）的**每个头**的维度 | qk_rope_head_dim |                           $d\_h^R$                            |
+|   **最终**执行注意力计算的 query 和 key 的**每个头**的维度   |   qk_head_dim    |                         $d\_h+d\_h^R$                          |
+|         value的每个头的维度，论文中**也设为** $d\_h$          |    v_head_dim    |                            $d\_h$                             |
+|                     注意力计算的缩放因子                     |  softmax_scale   |                   $1/\sqrt{(d\_h + d\_h^R)}$                   |
+|          对原始向量执行$\mathbf{c}\_t^Q$下投影的矩阵          |    self.wq_a     |             $W^{DQ}\in\mathbb{R}^{d\_c'\times d}$             |
+| **同时**对$\mathbf{c}\_t^Q$执行$\mathbf{q}\_t^C$上投影（$W^{UQ}\in \mathbb{R}^{d\_h n\_h \times d\_c'}$）和$\mathbf{q}\_t^R$解耦（$W^{QR} \in \mathbb{R}^{d\_h^R n\_h \times d\_c'}$）的矩阵 |    self.wq_b     | $[W^{UQ};W^{QR}]\in \mathbb{R}^{(d\_h+d\_h^R) n\_h \times d\_c'}$ |
+| **同时**对原始向量进行$\mathbf{c}\_t^{KV}$下投影（$W^{DKV} \in \mathbb{R}^{d\_c \times d}$）和$\mathbf{k}\_t^R$解耦（$W^{KR} \in \mathbb{R}^{d\_h^R \times d}$）的矩阵 |    self.wkv_a    |   $[W^{DKV};W^{KR}]\in \mathbb{R}^{(d\_c+d\_h^R) \times d}$    |
+| **同时**对$\mathbf{c}\_t^{KV}$执行$\mathbf{k}\_t^C$上投影（$W^{UK}\in \mathbb{R}^{d\_h n\_h \times d\_c}$）和$\mathbf{v}\_t^C$上投影（$W^{UV}\in \mathbb{R}^{d\_h n\_h \times d\_c}$）的矩阵 |    self.wkv_b    |  $[W^{UK};W^{UV}]\in \mathbb{R}^{(d\_h+d\_h) n\_h \times d\_c}$  |
+|                       输出维度变换矩阵                       |     self.wo      |           $W^O \in \mathbb{R}^{d \times d\_h n\_h}$            |
 
 通过捋清楚这些变量的含义，结合MLA的理论，就基本可以构想出后续`forward`方法的实现。因此，**弄清变量的含义这一步非常重要**。另外需说明的是，源代码中的线性层是使用**模型分布**的方法自定义实现的，由于我们只使用**单卡**或**ddp**实现一个较小的模型，因此将线性层简化为`nn.Linear`实现，且偏置均设置为`bias=False`。
 
@@ -238,7 +239,7 @@ q_nope, q_pe = torch.split(q, [self.qk_nope_head_dim, self.qk_rope_head_dim], di
 q_pe = apply_rotary_emb(q_pe, freqs_cis)
 ```
 
-**第1行**：对原始向量$\mathbf{h}_t$依次进行**下投影（得到$\mathbf{c}_t^Q$）**、**RMSNorm**和**上投影（得到$\mathbf{q}_t^C$）+解耦（得到还未加入位置信息的$\mathbf{q}_t^R$）**，对应的公式为：
+**第1行**：对原始向量$\mathbf{h}\_t$依次进行**下投影（得到$\mathbf{c}\_t^Q$）**、**RMSNorm**和**上投影（得到$\mathbf{q}\_t^C$）+解耦（得到还未加入位置信息的$\mathbf{q}\_t^R$）**，对应的公式为：
 
 $$
 \begin{align}
@@ -249,9 +250,9 @@ $$
 \end{align}
 $$
 
-输入变量`x`的形状为`(batch_size, seq_len, dim)`，输出变量`q`实际上是$[\mathbf{q}_t^C;\mathbf{q}_t^R] \in \mathbb{R}^{(d_h+d_h^R)n_h}$，即`(batch_size, seq_len, n_heads * qk_head_dim)`
+输入变量`x`的形状为`(batch_size, seq_len, dim)`，输出变量`q`实际上是$[\mathbf{q}\_t^C;\mathbf{q}\_t^R] \in \mathbb{R}^{(d\_h+d\_h^R)n\_h}$，即`(batch_size, seq_len, n_heads * qk_head_dim)`
 
-**第2行**：将上一行的输出$[\mathbf{q}_t^C;\mathbf{q}_t^R] \in \mathbb{R}^{(d_h+d_h^R)n_h}$划分注意力头数，即
+**第2行**：将上一行的输出$[\mathbf{q}\_t^C;\mathbf{q}\_t^R] \in \mathbb{R}^{(d\_h+d\_h^R)n\_h}$划分注意力头数，即
 
 $$
 \begin{equation}
@@ -264,13 +265,13 @@ $$
 \end{equation}
 $$
 
-其中，$\mathbf{q}_{t,i}=[\mathbf{q}_{t,i}^C;\mathbf{q}_{t,i}^R]\in \mathbb{R}^{d_h+d_h^R}$是**最终**执行注意力计算的**每个query头**，且此时解耦的$\mathbf{q}_{t,i}^R$部分还未加入RoPE。
+其中，$\mathbf{q}\_{t,i}=[\mathbf{q}\_{t,i}^C;\mathbf{q}\_{t,i}^R]\in \mathbb{R}^{d\_h+d\_h^R}$是**最终**执行注意力计算的**每个query头**，且此时解耦的$\mathbf{q}\_{t,i}^R$部分还未加入RoPE。
 
 在这一行，变量`q`的形状变化为：
 
 -   `(batch_size, seq_len, n_heads * qk_head_dim) -> (batch_size, seq_len, n_heads, qk_head_dim)`
 
-**第3行**：将$\mathbf{q}_{t,i}=[\mathbf{q}_{t,i}^C;\mathbf{q}_{t,i}^R]\in \mathbb{R}^{d_h+d_h^R}$切分为不需携带位置编码的`q_nope`和需要携带位置编码的`q_pe`两部分，即$\mathbf{q}_{t,i}^C \in \mathbb{R}^{d_h}$和$\mathbf{q}_{t,i}^R \in \mathbb{R}^{d_h^R}$两部分。
+**第3行**：将$\mathbf{q}\_{t,i}=[\mathbf{q}\_{t,i}^C;\mathbf{q}\_{t,i}^R]\in \mathbb{R}^{d\_h+d\_h^R}$切分为不需携带位置编码的`q_nope`和需要携带位置编码的`q_pe`两部分，即$\mathbf{q}\_{t,i}^C \in \mathbb{R}^{d\_h}$和$\mathbf{q}\_{t,i}^R \in \mathbb{R}^{d\_h^R}$两部分。
 
 因此，变量形状有：
 
@@ -294,7 +295,7 @@ kv, k_pe = torch.split(kv, [self.kv_lora_rank, self.qk_rope_head_dim], dim=-1)
 k_pe = apply_rotary_emb(k_pe.unsqueeze(2), freqs_cis)
 ```
 
-**第1行**：对原始向量$\mathbf{h}_t$进行**下投影（得到$\mathbf{c}_t^{KV}$）**+**解耦（得到还未加入位置信息的$\mathbf{k}_t^R$）**，对应的公式为：
+**第1行**：对原始向量$\mathbf{h}\_t$进行**下投影（得到$\mathbf{c}\_t^{KV}$）**+**解耦（得到还未加入位置信息的$\mathbf{k}\_t^R$）**，对应的公式为：
 
 $$
 \begin{align}
@@ -303,9 +304,9 @@ $$
 \end{align}
 $$
 
-输入变量`x`的形状为`(batch_size, seq_len, dim)`，输出变量`kv`实际上是$[\mathbf{c}_t^{KV};\mathbf{k}_t^R]\in\mathbb{R}^{d_c+d_h^R}$，即`(batch_size, seq_len, kv_lora_rank + qk_rope_head_dim)`
+输入变量`x`的形状为`(batch_size, seq_len, dim)`，输出变量`kv`实际上是$[\mathbf{c}\_t^{KV};\mathbf{k}\_t^R]\in\mathbb{R}^{d\_c+d\_h^R}$，即`(batch_size, seq_len, kv_lora_rank + qk_rope_head_dim)`
 
-**第2行**：将$[\mathbf{c}_t^{KV};\mathbf{k}_t^R]\in\mathbb{R}^{d_c+d_h^R}$切分为潜在向量`kv`和需要携带位置编码的`k_pe`两部分，即$\mathbf{c}_t^{KV}\in\mathbb{R}^{d_c}$和$\mathbf{k}_t^R\in\mathbb{R}^{d_h^R}$两部分。
+**第2行**：将$[\mathbf{c}\_t^{KV};\mathbf{k}\_t^R]\in\mathbb{R}^{d\_c+d\_h^R}$切分为潜在向量`kv`和需要携带位置编码的`k_pe`两部分，即$\mathbf{c}\_t^{KV}\in\mathbb{R}^{d\_c}$和$\mathbf{k}\_t^R\in\mathbb{R}^{d\_h^R}$两部分。
 
 因此，变量形状有：
 
@@ -330,7 +331,7 @@ q_nope = torch.einsum("bshd,hdc->bshc", q_nope, wkv_b[:, :self.qk_nope_head_dim]
 
 **第1行**：获取`self.wkv_b`的权重矩阵，在`nn.Linear`中，权重矩阵的形状为`(out_features, in_features)`，因此`wkv_b`的形状为`(n_heads * (qk_nope_head_dim + v_head_dim), kv_lora_rank)`
 
-**第2行**：进一步将`wkv_b`变为`(n_heads, qk_nope_head_dim + v_head_dim, kv_lora_rank)`。我们知道，`wkv_b`实际上是$[W^{UK};W^{UV}]\in \mathbb{R}^{(d_h+d_h) n_h \times d_c}$，这一行的目的是为了方便后续切分出$W^{UK}$和$W^{UV}$，它们分别需要吸收到$W^{UQ}$和$W^O$中。
+**第2行**：进一步将`wkv_b`变为`(n_heads, qk_nope_head_dim + v_head_dim, kv_lora_rank)`。我们知道，`wkv_b`实际上是$[W^{UK};W^{UV}]\in \mathbb{R}^{(d\_h+d\_h) n\_h \times d\_c}$，这一行的目的是为了方便后续切分出$W^{UK}$和$W^{UV}$，它们分别需要吸收到$W^{UQ}$和$W^O$中。
 
 **第3行**：在**query部分**的代码实现中，我们得到了`q_nope: (batch_size, seq_len, n_heads, qk_nope_head_dim)`，它实际上是
 
@@ -349,7 +350,7 @@ $$
 \end{equation}
 $$
 
-其中，对于第$i$个注意力头，$W_i^{UQ}\in\mathbb{R}^{d_h \times d_c'}$是$W^{UQ} \in \mathbb{R}^{d_h n_h \times d_c'}$的分块矩阵。同理，正常来说，在**key/value部分**，本应计算出`k_nope`，类似的应该有：
+其中，对于第$i$个注意力头，$W\_i^{UQ}\in\mathbb{R}^{d\_h \times d\_c'}$是$W^{UQ} \in \mathbb{R}^{d\_h n\_h \times d\_c'}$的分块矩阵。同理，正常来说，在**key/value部分**，本应计算出`k_nope`，类似的应该有：
 
 $$
 \begin{equation}
@@ -367,13 +368,13 @@ $$
 \end{aligned}\end{equation}
 $$
 
-其中，$W_i^{UQ'}\in \mathbb{R}^{d_c \times d_c'}$是**每个注意力头**$W_i^{UQ}$吸收了$W_i^{UK}$得到的新矩阵。因此，对**所有注意力头**而言，有新的$W^{UQ'}\in \mathbb{R}^{d_c n_h \times d_c'}$，那么在矩阵吸收之后，新的`q_nope`变为$W^{UQ'}\mathbf{c}_t^Q =[W_1^{UQ'} \mathbf{c}_t^Q;W_2^{UQ'} \mathbf{c}_t^Q;\ldots;W_{n_h}^{UQ'} \mathbf{c}_t^Q;]$，即新`q_nope`的形状变为：
+其中，$W\_i^{UQ'}\in \mathbb{R}^{d\_c \times d\_c'}$是**每个注意力头**$W\_i^{UQ}$吸收了$W\_i^{UK}$得到的新矩阵。因此，对**所有注意力头**而言，有新的$W^{UQ'}\in \mathbb{R}^{d\_c n\_h \times d\_c'}$，那么在矩阵吸收之后，新的`q_nope`变为$W^{UQ'}\mathbf{c}\_t^Q =[W\_1^{UQ'} \mathbf{c}\_t^Q;W\_2^{UQ'} \mathbf{c}\_t^Q;\ldots;W\_{n\_h}^{UQ'} \mathbf{c}\_t^Q;]$，即新`q_nope`的形状变为：
 
 -   `q_nope: (batch_size, seq_len, n_heads, kv_lora_rank)`
 
 因此，矩阵吸收后，在**key/value部分**中是不用计算出`k_nope`的，直接使用潜在向量`kv`即可。
 
-上述第3行代码是通过**[爱因斯坦求和约定](https://www.cnblogs.com/qftie/p/16245124.html)**：`einsum`来实现矩阵吸收的。首先从`wkv_b`中切分出`wkv_b[:, :self.qk_nope_head_dim]`，即形状为`(n_heads, qk_nope_head_dim, kv_lora_rank)`的部分，它代表了每个头的$W_i^{UK}\in \mathbb{R}^{d_h \times d_c}$。
+上述第3行代码是通过**[爱因斯坦求和约定](https://www.cnblogs.com/qftie/p/16245124.html)**：`einsum`来实现矩阵吸收的。首先从`wkv_b`中切分出`wkv_b[:, :self.qk_nope_head_dim]`，即形状为`(n_heads, qk_nope_head_dim, kv_lora_rank)`的部分，它代表了每个头的$W\_i^{UK}\in \mathbb{R}^{d\_h \times d\_c}$。
 
 因此，`einsum`接收的参数是：
 
@@ -384,7 +385,7 @@ $$
 
 -   `新q_nope: (batch_size, seq_len, n_heads, kv_lora_rank) -> (b s h c)`
 
->   【思考】：模型训练好后，能否直接将$W^{UQ'}\in \mathbb{R}^{d_c n_h \times d_c'}$保存下来，这样就不用在`forward`时重复计算吸收过程？或者能否干脆将它作为初始化的权重来训练，从而省略在`forward`中进行的矩阵吸收？见[【笔记】MLA矩阵吸收分析](/2026-01-01/Note-MLA-Absorb.html)
+>   【思考】：模型训练好后，能否直接将$W^{UQ'}\in \mathbb{R}^{d\_c n\_h \times d\_c'}$保存下来，这样就不用在`forward`时重复计算吸收过程？或者能否干脆将它作为初始化的权重来训练，从而省略在`forward`中进行的矩阵吸收？见[【笔记】MLA矩阵吸收分析](/2026-01-01/Note-MLA-Absorb.html)
 
 **至此，完成了下图中红框所示的部分**：
 
@@ -468,7 +469,7 @@ $$
 \end{equation}
 $$
 
-其中，$\alpha_{j,i}$ 表示在第 $i$ 个注意力头中，当前位置 $t$ 对位置 $j$ 计算得到的注意力权重。$\mathbf{o}_{t,i}$ 为每个注意力头的输出向量。因此，最终的输出为：
+其中，$\alpha\_{j,i}$ 表示在第 $i$ 个注意力头中，当前位置 $t$ 对位置 $j$ 计算得到的注意力权重。$\mathbf{o}\_{t,i}$ 为每个注意力头的输出向量。因此，最终的输出为：
 
 $$
 \begin{equation}
@@ -484,12 +485,12 @@ $$
 
 其中：
 
- - $W^O \in \mathbb{R}^{d \times d_h n_h}$
- - $W_i^O \in \mathbb{R}^{d \times d_h}$
- - $W_i^{UV} \in \mathbb{R}^{d_h \times d_c}$
- - $W_i^{O'} = W_i^O W_i^{UV} \in \mathbb{R}^{d \times d_c}$
- - $W^{O'} \in \mathbb{R}^{d \times d_c n_h}$
- - $\mathbf{u}_t \in \mathbb{R}^{d}$
+ - $W^O \in \mathbb{R}^{d \times d\_h n\_h}$
+ - $W\_i^O \in \mathbb{R}^{d \times d\_h}$
+ - $W\_i^{UV} \in \mathbb{R}^{d\_h \times d\_c}$
+ - $W\_i^{O'} = W\_i^O W\_i^{UV} \in \mathbb{R}^{d \times d\_c}$
+ - $W^{O'} \in \mathbb{R}^{d \times d\_c n\_h}$
+ - $\mathbf{u}\_t \in \mathbb{R}^{d}$
 
 第4行代码首先计算了`scores`和`kv_cache`相乘，`einsum`接收的参数是：
 
@@ -501,7 +502,7 @@ $$
 
 -   `x: (batch_size, seq_len, n_heads, kv_lora_rank) -> (b s h c)`
 
-**第5行**：从`wkv_b`中切分出`wkv_b[:, :self.v_head_dim]`，即形状为`(n_heads, v_head_dim, kv_lora_rank)`的部分，它代表了每个头的$W_i^{UV} \in \mathbb{R}^{d_h \times d_c}$，因此，`einsum`接收的参数是：
+**第5行**：从`wkv_b`中切分出`wkv_b[:, :self.v_head_dim]`，即形状为`(n_heads, v_head_dim, kv_lora_rank)`的部分，它代表了每个头的$W\_i^{UV} \in \mathbb{R}^{d\_h \times d\_c}$，因此，`einsum`接收的参数是：
 
 -   `x: (batch_size, seq_len, n_heads, kv_lora_rank) -> (b s h c)`
 -   `wkv_b[:, :self.v_head_dim]: (n_heads, v_head_dim, kv_lora_rank) -> (h d c)`
@@ -713,7 +714,7 @@ scores_logits = F.linear(x, self.weight, None)
 scores = scores_logits.sigmoid()
 ```
 
-令 $\mathbf{u}_t$ 为第 $t$ 个token的输入，这两行代码对应的公式为：
+令 $\mathbf{u}\_t$ 为第 $t$ 个token的输入，这两行代码对应的公式为：
 
 $$
 \begin{equation}
@@ -723,8 +724,8 @@ $$
 
 其中：
 
- - $s_{i,t}$ ：token与第$i$个专家之间的亲和度得分，即某个token被分配给某个专家的概率或权重
- - $\mathbf{e}_i$ ：第 $i$ 个路由专家的质心向量，用于衡量token和专家的匹配程度
+ - $s\_{i,t}$ ：token与第$i$个专家之间的亲和度得分，即某个token被分配给某个专家的概率或权重
+ - $\mathbf{e}\_i$ ：第 $i$ 个路由专家的质心向量，用于衡量token和专家的匹配程度
 
 可见，这里的质心向量实际上就是初始化的`self.weight`，它会在训练中学习到。`scores`的形状为`(batch_size * seq_len, n_routed_experts)`。
 
@@ -967,17 +968,17 @@ $$
  - $\alpha$ ：平衡因子，会被设置为一个非常小的值
  - $\mathbb{I}(\cdot)$ ：指标函数，若符合括号中的情况，则记为1，不符合则记为0
  - $T$ ：序列中的token数
- - $s_{i,t}'$ ：第 $t$ 个token在第 $i$ 个专家上的归一化亲和度得分【注意：与gate不同，这是对所有的得分进行归一化】
- - $P_i$ ：第 $i$ 个专家**在每个token上的归一化亲和度得分均值**
- - $\mathbb{I}(s_{i,t} \in \text{Topk}(\{s_{j,t} \mid 1 \leq j \leq N_r\}, K_r))$ ：对于第 $i$ 个专家，若被第 $t$ 个token激活（是top-k之一），则记为1，否则记为0
- - $\frac{1}{T} \sum_{t=1}^{T} \mathbb{I}(s_{i,t} \in \text{Topk}(\{s_{j,t} \mid 1 \leq j \leq N_r\}, K_r))$ ：第 $i$ 个专家**在每个token上的平均激活次数**
- - $\frac{N_r}{K_r}$ ：缩放系数
- - $f_iP_i$ ：第 $i$ 个专家在每个token上的平均激活次数乘以平均得分
+ - $s\_{i,t}'$ ：第 $t$ 个token在第 $i$ 个专家上的归一化亲和度得分【注意：与gate不同，这是对所有的得分进行归一化】
+ - $P\_i$ ：第 $i$ 个专家**在每个token上的归一化亲和度得分均值**
+ - $\mathbb{I}(s\_{i,t} \in \text{Topk}(\{s\_{j,t} \mid 1 \leq j \leq N\_r\}, K\_r))$ ：对于第 $i$ 个专家，若被第 $t$ 个token激活（是top-k之一），则记为1，否则记为0
+ - $\frac{1}{T} \sum\_{t=1}^{T} \mathbb{I}(s\_{i,t} \in \text{Topk}(\{s\_{j,t} \mid 1 \leq j \leq N\_r\}, K\_r))$ ：第 $i$ 个专家**在每个token上的平均激活次数**
+ - $\frac{N\_r}{K\_r}$ ：缩放系数
+ - $f\_iP\_i$ ：第 $i$ 个专家在每个token上的平均激活次数乘以平均得分
 
-> 为什么要乘 $\frac{N_r}{K_r}$ ？  
-> 在理想完全均匀的情况下：每个 token 会选 $K_r$ 个专家，专家总数是 $N_r$，那么对任意一个专家，被选中的期望概率应该是 $\frac{K_r}{N_r}$ 。也就是说，在均衡状态下，专家 $i$ 的被选中占比应当约等于 $\frac{K_r}{N_r}$。为了让均衡状态对应一个统一的标尺（通常希望均衡时 $f_i \approx 1$ ），因此乘上系数 $\frac{N_r}{K_r}$。  
->  - $f_i>1$：这个专家在该序列里被选得比均匀情况更频繁（过载倾向）  
-> - $f_i<1$：被选得更少（欠载倾向）  
+> 为什么要乘 $\frac{N\_r}{K\_r}$ ？  
+> 在理想完全均匀的情况下：每个 token 会选 $K\_r$ 个专家，专家总数是 $N\_r$，那么对任意一个专家，被选中的期望概率应该是 $\frac{K\_r}{N\_r}$ 。也就是说，在均衡状态下，专家 $i$ 的被选中占比应当约等于 $\frac{K\_r}{N\_r}$。为了让均衡状态对应一个统一的标尺（通常希望均衡时 $f\_i \approx 1$ ），因此乘上系数 $\frac{N\_r}{K\_r}$。  
+>  - $f\_i>1$：这个专家在该序列里被选得比均匀情况更频繁（过载倾向）  
+> - $f\_i<1$：被选得更少（欠载倾向）  
 
 ```python
 scores_for_seq_aux = self.gate.original_scores.view(bsz, seqlen, -1)
@@ -985,7 +986,7 @@ scores_for_seq_aux = scores_for_seq_aux / scores_for_seq_aux.sum(dim=-1, keepdim
 P_i = scores_for_seq_aux.mean(dim=1)
 ```
 
-首先将`Gate`的原始得分从`(batch_size * seq_len, n_routed_experts)`变为`(batch_size, seq_len, n_routed_experts)`，此即原始的$s_{i,t}$，沿着`n_routed_experts`的方向归一化，形成$s_{i,t}'$。而后沿着token的方向求平均，得到$P_i$，形状为`(batch_size, n_routed_experts)`，含义为第$i$个专家在一个序列中每个token上的平均归一化亲和度得分。
+首先将`Gate`的原始得分从`(batch_size * seq_len, n_routed_experts)`变为`(batch_size, seq_len, n_routed_experts)`，此即原始的$s\_{i,t}$，沿着`n_routed_experts`的方向归一化，形成$s\_{i,t}'$。而后沿着token的方向求平均，得到$P\_i$，形状为`(batch_size, n_routed_experts)`，含义为第$i$个专家在一个序列中每个token上的平均归一化亲和度得分。
 
 ```python
 f_i = F.one_hot(indices.view(bsz, -1), num_classes=self.n_routed_experts)
@@ -994,13 +995,13 @@ f_i = (f_i * self.n_routed_experts) / (self.n_activated_experts * seqlen)
 seq_aux_loss = (f_i * P_i).sum() * self.seq_aux_alpha
 ```
 
-现在来计算$f_i$，即第$i$个专家在一个序列中每个token上的平均激活次数。`indices`的初始形状为`(batch_size * seq_len, topk)`，表示一个batch中每个token激活了哪些专家。现在我们需要计算的是在一个batch的每个序列中，每个专家被哪些token激活，可以使用one-hot编码来实现这一过程。
+现在来计算$f\_i$，即第$i$个专家在一个序列中每个token上的平均激活次数。`indices`的初始形状为`(batch_size * seq_len, topk)`，表示一个batch中每个token激活了哪些专家。现在我们需要计算的是在一个batch的每个序列中，每个专家被哪些token激活，可以使用one-hot编码来实现这一过程。
 
 -   上述代码第1行：首先将`indices`形状变为`(batch_size, seq_len * topk)`，而后使用one-hot编码，类别数为`n_routed_experts`，得到形状为`(batch_size, seq_len * topk, n_routed_experts)`的ont-hot编码。
--   上述代码第2行：沿着`seq_len * topk`维度相加后，可求出每个专家被多少个token激活，得到形状`(batch_size, n_routed_experts)`，得到了$\sum_{t=1}^{T} \mathbb{I}(s_{i,t} \in \text{Topk}(\{s_{j,t} \mid 1 \leq j \leq N_r\}, K_r))$。
--   上述代码第3行：乘以$\frac{N_r}{K_r T}$系数，得到第$i$个专家在一个序列中每个token上的平均激活次数。
+-   上述代码第2行：沿着`seq_len * topk`维度相加后，可求出每个专家被多少个token激活，得到形状`(batch_size, n_routed_experts)`，得到了$\sum\_{t=1}^{T} \mathbb{I}(s\_{i,t} \in \text{Topk}(\{s\_{j,t} \mid 1 \leq j \leq N\_r\}, K\_r))$。
+-   上述代码第3行：乘以$\frac{N\_r}{K\_r T}$系数，得到第$i$个专家在一个序列中每个token上的平均激活次数。
 
-最后，根据$\mathcal{L}_{\text{Bal}} = \alpha \sum_{i=1}^{N_r} f_i P_i$求得**当前层**的`MoE`所计算出的序列级辅助损失。直观理解上， $P_i$ 可由调整模型权重来改变，而 $f_i$ 是由 $P_i$ 导致的客观结果，专家 $i$ 的得分大，自然被激活的次数就多。因此，若在一个序列中，各个token最终激活专家 $i$ 的频率 $f_i$ 很大，那么该专家的得分 $P_i$ 就应该减小，反之亦然，从而鼓励每个序列上的专家负载变得均衡。
+最后，根据$\mathcal{L}\_{\text{Bal}} = \alpha \sum\_{i=1}^{N\_r} f\_i P\_i$求得**当前层**的`MoE`所计算出的序列级辅助损失。直观理解上， $P\_i$ 可由调整模型权重来改变，而 $f\_i$ 是由 $P\_i$ 导致的客观结果，专家 $i$ 的得分大，自然被激活的次数就多。因此，若在一个序列中，各个token最终激活专家 $i$ 的频率 $f\_i$ 很大，那么该专家的得分 $P\_i$ 就应该减小，反之亦然，从而鼓励每个序列上的专家负载变得均衡。
 
 ### 4. 计算专家输出
 
@@ -1082,7 +1083,7 @@ class Block(nn.Module):
 
 <div align="center"><img src="https://static.zybuluo.com/wangkunqing13/vk4cfskc8qt1z39d43td0vkm/image.png" width="100%" alt="image.png-104.4kB"></div>
 
-首先结合原文图片看MTP的公式表达。对于输入的第 $i$ 个token $t_i$ ，在预测深度为 $k$ 时，首先通过投影矩阵融合第 $k-1$ 个预测深度的输出表征 $\mathbf{h}_i^{k-1} \in \mathbb{R}^d$ 和第 $i+k$ 个token的Embedding $\text{Emb}(t_{i+k}) \in \mathbb{R}^d$ ：
+首先结合原文图片看MTP的公式表达。对于输入的第 $i$ 个token $t\_i$ ，在预测深度为 $k$ 时，首先通过投影矩阵融合第 $k-1$ 个预测深度的输出表征 $\mathbf{h}\_i^{k-1} \in \mathbb{R}^d$ 和第 $i+k$ 个token的Embedding $\text{Emb}(t\_{i+k}) \in \mathbb{R}^d$ ：
 
 $$
 \begin{equation}
@@ -1090,7 +1091,7 @@ $$
 \end{equation}
 $$
 
-其中，$[\cdot ; \cdot]$ 表示拼接操作。特别的，当 $k=1$ 时，$\mathbf{h}_i^{k-1}$ 就是主模型的表征。另外，注意每个MTP模块的Embedding层和输出头，都是与主模型共享的。融合后的 $\mathbf{h}_i^{'k}$ 作为输入，输入到第 $k$ 个深度的Transformer模块中，产生输出表征 $\mathbf{h}_i^{k}$ ：
+其中，$[\cdot ; \cdot]$ 表示拼接操作。特别的，当 $k=1$ 时，$\mathbf{h}\_i^{k-1}$ 就是主模型的表征。另外，注意每个MTP模块的Embedding层和输出头，都是与主模型共享的。融合后的 $\mathbf{h}\_i^{'k}$ 作为输入，输入到第 $k$ 个深度的Transformer模块中，产生输出表征 $\mathbf{h}\_i^{k}$ ：
 
 $$
 \begin{equation}
@@ -1098,8 +1099,8 @@ $$
 \end{equation}
 $$
 
-这里需要着重理解公式$\eqref{eq:trm}$中的下标$1:T-k$的含义。如果直接看原图，例如$k=1$时，很容易误解为$\text{TRM}_1(\cdot)$的输入是$t_2t_3t_4t_5$，那么公式$\eqref{eq:trm}$的下标为什么从1开始？首先需要理解$T$的含义，这里$T$是**输入的序列长度**，以原图为例，这里的输入序列长度为6，这个$T$指的是我们在训练时可以真正用作input的长度，$t_7$不计算在$T$里，因为$t_7$永远都要当做target来计算损失。在构造数据时，我们拿到的原始序列为$t_1$~$t
-_7$，通常为了执行next token预测，我们会将$t_1$~$t_6$作为input，将$t_2$~$t_7$作为target，这样便可以使每一个位置的token预测下1个位置的token。当需要执行多token预测时，作为input的序列就要相应的缩短，例如，如果我们需要预测下2个token，此时$k=1$，我们会将$t_1$~$t_5$作为input，将$t_3$~$t_7$作为target，这样便可以使每一个位置的token预测下2个位置的token。如果我们需要预测下3个token，此时$k=2$，我们会将$t_1$~$t_4$作为input，将$t_4$~$t_7$作为target，这样便可以使每一个位置的token预测下3个位置的token。如下图所示：
+这里需要着重理解公式$\eqref{eq:trm}$中的下标$1:T-k$的含义。如果直接看原图，例如$k=1$时，很容易误解为$\text{TRM}\_1(\cdot)$的输入是$t\_2t\_3t\_4t\_5$，那么公式$\eqref{eq:trm}$的下标为什么从1开始？首先需要理解$T$的含义，这里$T$是**输入的序列长度**，以原图为例，这里的输入序列长度为6，这个$T$指的是我们在训练时可以真正用作input的长度，$t\_7$不计算在$T$里，因为$t\_7$永远都要当做target来计算损失。在构造数据时，我们拿到的原始序列为$t\_1$~$t
+\_7$，通常为了执行next token预测，我们会将$t\_1$~$t\_6$作为input，将$t\_2$~$t\_7$作为target，这样便可以使每一个位置的token预测下1个位置的token。当需要执行多token预测时，作为input的序列就要相应的缩短，例如，如果我们需要预测下2个token，此时$k=1$，我们会将$t\_1$~$t\_5$作为input，将$t\_3$~$t\_7$作为target，这样便可以使每一个位置的token预测下2个位置的token。如果我们需要预测下3个token，此时$k=2$，我们会将$t\_1$~$t\_4$作为input，将$t\_4$~$t\_7$作为target，这样便可以使每一个位置的token预测下3个位置的token。如下图所示：
 
 -   $k=0$时的输入输出：（图一）
 
@@ -1113,7 +1114,7 @@ _7$，通常为了执行next token预测，我们会将$t_1$~$t_6$作为input，
 
 <div align="center"><img src="https://wkqpicture.oss-cn-beijing.aliyuncs.com/img/20250619131834180.png" width="100%" alt="image-20250619131833677"></div>
 
-因此，不论$k$是几，$\text{TRM}_k(\cdot)$的输入的下标均是$1:T-k$，这实际上是主模型的输入序列，即**左下角的红框**，而$\text{TRM}_k(\cdot)$的输出则是**右上角的红框**，这也符合预测下$k+1$个token的逻辑。实际上我们可以将**绿框**中的部分理解为是一个辅助输入，对于这些辅助输入，$\text{TRM}_k(\cdot)$做的是next token预测，但对于主模型输入，做的则是多token预测。
+因此，不论$k$是几，$\text{TRM}\_k(\cdot)$的输入的下标均是$1:T-k$，这实际上是主模型的输入序列，即**左下角的红框**，而$\text{TRM}\_k(\cdot)$的输出则是**右上角的红框**，这也符合预测下$k+1$个token的逻辑。实际上我们可以将**绿框**中的部分理解为是一个辅助输入，对于这些辅助输入，$\text{TRM}\_k(\cdot)$做的是next token预测，但对于主模型输入，做的则是多token预测。
 
 再来看MTP的损失计算方式，对每个预测深度，计算交叉熵损失：
 
@@ -1126,12 +1127,12 @@ $$
 其中：
 
  - $T$ ：输入序列长度，在本文的例子中为6
- - $t_i$ ：第 $i$ 个位置的ground truth token
- - $P_i^k[t_i]$ ：由第 $k$ 个MTP模块给出的对应 $t_i$ 的预测概率
+ - $t\_i$ ：第 $i$ 个位置的ground truth token
+ - $P\_i^k[t\_i]$ ：由第 $k$ 个MTP模块给出的对应 $t\_i$ 的预测概率
 
-从公式角度来看，第$k$个MTP模块计算的应当是$t_{2+k}$~$t_{T+1}$的交叉熵损失，例如在原图中，$k=2$时，计算的是$t_4$~$t_7$的损失，这没问题。问题在于，原文的图直接将$\mathcal{L}_\text{MTP}^1$标记在了MTP模块1旁边，这是具有迷惑性的，如果根据图中的标识，可能很容易理解为$\mathcal{L}_\text{MTP}^1$是在为$t_3$~$t_6$做损失，如果真是这样的话，对于token $t_5$就丢失了预测下2个token的过程。实际上，根据公式，$k=1$时，应当计算的是$t_3$~$t_7$的损失，即也需要做到$T+1$的token，如**图二**所示。
+从公式角度来看，第$k$个MTP模块计算的应当是$t\_{2+k}$~$t\_{T+1}$的交叉熵损失，例如在原图中，$k=2$时，计算的是$t\_4$~$t\_7$的损失，这没问题。问题在于，原文的图直接将$\mathcal{L}\_\text{MTP}^1$标记在了MTP模块1旁边，这是具有迷惑性的，如果根据图中的标识，可能很容易理解为$\mathcal{L}\_\text{MTP}^1$是在为$t\_3$~$t\_6$做损失，如果真是这样的话，对于token $t\_5$就丢失了预测下2个token的过程。实际上，根据公式，$k=1$时，应当计算的是$t\_3$~$t\_7$的损失，即也需要做到$T+1$的token，如**图二**所示。
 
-从图一至图三来看，$t_1$~$t_6$全部作为输入，均在主模型做了next token预测，计算$t_2$~$t_7$的损失。然后**截取**主模型$t_1$~$t_5$的输出表征，结合$t_2$~$t_6$辅助（辅助使用的是输入序列的ground truth），在MTP 1中做了下2个token预测，计算$t_3$~$t_7$的损失。然后**截取**MTP 1 $t_1$~$t_4$的输出表征，结合$t_3$~$t_6$辅助，在MTP 2中做了下3个token的预测，计算$t_4$~$t_7$的损失。下图能很好的展示这一点这一过程：
+从图一至图三来看，$t\_1$~$t\_6$全部作为输入，均在主模型做了next token预测，计算$t\_2$~$t\_7$的损失。然后**截取**主模型$t\_1$~$t\_5$的输出表征，结合$t\_2$~$t\_6$辅助（辅助使用的是输入序列的ground truth），在MTP 1中做了下2个token预测，计算$t\_3$~$t\_7$的损失。然后**截取**MTP 1 $t\_1$~$t\_4$的输出表征，结合$t\_3$~$t\_6$辅助，在MTP 2中做了下3个token的预测，计算$t\_4$~$t\_7$的损失。下图能很好的展示这一点这一过程：
 
 <div align="center"><img src="https://wkqpicture.oss-cn-beijing.aliyuncs.com/img/20250426102933086.png" width="90%" alt="token"></div>
 
