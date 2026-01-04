@@ -1,0 +1,14 @@
+{% if site.showBuyCoffee != false %}
+<div class="coffee">
+  <button class="buy-me-coffee" onclick="this.classList.toggle('active'); document.getElementById('pay-qrcode').classList.toggle('show');">
+    {% if page.lang == 'en-US' %}
+    Buy me a coffee ☕
+    {% else %}
+    请我喝杯咖啡 ☕
+    {% endif %}
+  </button>
+  <div id="pay-qrcode" class="pay-qrcode">
+    <img src="{{ site.payImage }}" alt="收款二维码" />
+  </div>
+</div>
+{% endif %}

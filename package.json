@@ -1,0 +1,23 @@
+{
+  "name": "wangkunqing-blog",
+  "author": "WangKunqing",
+  "homepage": "https://WKQ9411.github.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WKQ9411/WKQ9411.github.io"
+  },
+  "bugs": {
+    "url": "https://github.com/WKQ9411/WKQ9411.github.io/issues"
+  },
+  "scripts": {
+    "prep": "gem install bundler && bundle install",
+    "dev": "bundle exec jekyll serve --watch --trace --livereload",
+    "clean": "if exist _site rmdir /s /q _site && if exist .jekyll-cache rmdir /s /q .jekyll-cache",
+    "start": "npm run dev",
+    "build": "bundle exec jekyll build",
+    "min": "uglifyjs ./js/index.js -o ./js/index.min.js  --comments all"
+  },
+  "devDependencies": {
+    "uglify-js": "^2.7.5"
+  }
+}

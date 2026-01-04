@@ -1,0 +1,68 @@
+# Site Information
+title: WKQ
+description: "Deep Learning, Learning Deeply"
+url: https://WKQ9411.github.io
+repo: WKQ9411/WKQ9411.github.io
+lang: zh-CN
+encoding: utf-8
+timezone: Asia/Shanghai
+
+# Social Media and External URLs
+github: WKQ9411
+twitter: WKQ9411
+menu:
+  - title: "Categories"
+    url: "/categories.html"
+  - title: "About"
+    url: "/about.html"
+
+# SEO and Analytics
+google_analytics: G-8BX91XSQ5F
+
+# Build Settings
+paginate: 10
+post_ext: md
+page_ext: md
+post_layout: post
+page_layout: page
+titlecase: true
+future: true
+highlighter: rouge
+markdown: kramdown
+kramdown:
+  input: GFM
+  math_engine: mathjax
+  math_engine_opts: {}
+permalink: /:year-:month-:day/:title.html
+sass:
+  sass_dir: _sass
+  style: compressed
+
+collections:
+  posts:
+    output: true
+    permalink: /:year-:month-:day/:title.html
+
+include: [".htaccess"]
+exclude:
+  [
+    "Gemfile",
+    "Gemfile.lock",
+    "README.md",
+    "LICENSE",
+    "package.json",
+    "node_modules",
+  ]
+
+# Plugins
+plugins:
+  - jekyll-paginate
+  - jekyll-pdf-embed
+  - jekyll-sitemap
+  - jekyll-feed
+
+# Custom Site Settings
+showBuyCoffee: false
+payImage: /images/pay-qrcode.png
+assetUrl: /images/
+defaultImage: data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==

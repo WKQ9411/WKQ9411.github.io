@@ -1,0 +1,120 @@
+// Clearfix
+@use "sass:math";
+@use "variables" as *;
+
+// Font size in rem with px fallback
+@mixin font-rem($size) {
+  font-size: #{$size}px;
+  font-size: math.div($size, $doc-font-size) * 1rem;
+}
+
+// Font size (simple version)
+@mixin font-size($size) {
+  font-size: #{$size}px;
+  font-size: math.div($size, $doc-font-size) * 1rem;
+}
+
+@mixin clearfix {
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+@mixin need-dotted {
+  border-bottom: 1px dotted #c0c0c0;
+  &:hover {
+    border-bottom-style: solid;
+  }
+}
+
+// Center-align a block level element
+// ----------------------------------
+@mixin center-block() {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@mixin text-overflow($type: ellipsis) {
+  overflow: hidden;
+  text-overflow: $type;
+  white-space: nowrap;
+}
+
+// For image replacement (if needed in future)
+@mixin hide-text() {
+  text-indent: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+// Hide from visual and speaking browsers
+@mixin hidden() {
+  display: none !important;
+  visibility: hidden;
+}
+
+.hidden {
+  display: none;
+  visibility: hidden;
+}
+
+// .resize(VALUE) (none, both, horizontal, vertical, inherit)
+@mixin resize($direction: both) {
+  resize: $direction;
+  overflow: auto;
+}
+
+// Button base styles
+@mixin btn-base() {
+  display: inline-block;
+  margin-bottom: 20px;
+  padding: 0 20px;
+  height: 40px;
+  line-height: 38px; // height - border (2px)
+  font-size: 14px;
+  background-color: #24292f;
+  color: #fff;
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-color: #24292f;
+  border-radius: 3px;
+  text-decoration: none;
+  box-sizing: border-box;
+
+  &:visited {
+    color: #fff;
+  }
+
+  &:hover {
+    background-color: #fff;
+    color: #24292f;
+  }
+}
+
+// Transform
+@mixin transform($value) {
+  transform: $value;
+}
+
+// Transition
+@mixin transition($value) {
+  transition: $value;
+}
+
+// Border radius
+@mixin rounded($radius) {
+  border-radius: $radius;
+}
+
+// Border radius with individual corners (top-left, top-right, bottom-right, bottom-left)
+@mixin border-radius($top-left, $top-right, $bottom-right, $bottom-left) {
+  border-radius: $top-left $top-right $bottom-right $bottom-left;
+}
+
+// Flexbox
+@mixin flexbox() {
+  display: flex;
+}

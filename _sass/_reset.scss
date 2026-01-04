@@ -1,0 +1,194 @@
+//
+// Reset CSS
+// Adapted from http://github.com/necolas/normalize.css
+// --------------------------------------------------
+
+*,
+*:after,
+*:before {
+  box-sizing: border-box;
+}
+
+// Respect user's motion preferences
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+nav,
+section {
+  display: block;
+}
+
+audio,
+canvas,
+video {
+  display: inline-block;
+}
+
+audio:not([controls]) {
+  display: none;
+}
+
+// Base settings
+// -------------------------
+html {
+  font-size: 100%;
+}
+// Focus states
+// Modern focus-visible support - only show focus ring for keyboard navigation
+a:focus {
+  outline: none;
+}
+
+a:focus-visible {
+  box-shadow: 0 0 0 2px currentColor;
+  outline: none;
+}
+
+// Fallback for browsers without focus-visible support
+a:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+button:focus {
+  outline: none;
+}
+
+button:focus-visible {
+  box-shadow: 0 0 0 2px currentColor;
+  outline: none;
+}
+
+button:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+// Hover & Active
+a:hover,
+a:active {
+  outline: 0;
+}
+
+// Prevents sub and sup affecting line-height in all browsers
+// -------------------------
+sub,
+sup {
+  position: relative;
+  font-size: 75%;
+  line-height: 0;
+  vertical-align: baseline;
+}
+sup {
+  top: -0.5em;
+}
+sub {
+  bottom: -0.25em;
+}
+
+// Blockquote
+// -------------------------
+blockquote {
+  margin: 0;
+}
+
+// Img border in a's and image quality
+// -------------------------
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+  border: 0;
+  border-radius: 6px;
+}
+
+// Full width tables
+// -------------------------
+table {
+  width: 100%;
+}
+
+// Prevent max-width from affecting Google Maps
+#map_canvas img,
+.google-maps img {
+  max-width: none;
+}
+
+// Forms
+// -------------------------
+// Font size in all browsers, margin changes, misc consistency
+button,
+input,
+select,
+textarea {
+  margin: 0;
+  font-size: 100%;
+  vertical-align: middle;
+}
+button,
+input {
+  line-height: normal;
+}
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  cursor: pointer;
+  user-select: none;
+}
+label,
+select,
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"],
+input[type="radio"],
+input[type="checkbox"] {
+  cursor: pointer;
+}
+input[type="search"],
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="url"],
+textarea {
+  box-sizing: border-box;
+  font-size: 16px; // Prevent iOS zoom on focus
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+textarea {
+  overflow: auto;
+  vertical-align: top;
+}
+
+a {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-touch-callout: none;
+}
+
+// Only disable user-select for button-like links
+a.btn,
+button,
+[role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+}

@@ -1,0 +1,225 @@
+// OneDark Theme for Rouge Syntax Highlighting
+// Based on Atom's One Dark theme
+
+$onedark-bg: #282c34;
+$onedark-fg: #abb2bf;
+$onedark-comment: #5c6370;
+$onedark-red: #e06c75;
+$onedark-orange: #d19a66;
+$onedark-yellow: #e5c07b;
+$onedark-green: #98c379;
+$onedark-cyan: #56b6c2;
+$onedark-blue: #61afef;
+$onedark-purple: #c678dd;
+$onedark-gutter: #636d83;
+$onedark-selection: #3e4451;
+
+.highlight {
+  margin-bottom: 1.5em;
+  font-size: 12px;
+  color: $onedark-fg;
+  background-color: $onedark-bg;
+  border-radius: 6px;
+
+  pre {
+    position: relative;
+    margin: 0;
+    padding: 1em;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-x: auto;
+  }
+
+  // Line numbers
+  .lineno {
+    padding-right: 24px;
+    color: $onedark-gutter;
+    user-select: none;
+  }
+
+  // Highlighted line
+  .hll {
+    background-color: $onedark-selection;
+  }
+
+  // Comments
+  .c,    // Comment
+  .cm,   // Comment.Multiline
+  .cp,   // Comment.Preproc
+  .c1,   // Comment.Single
+  .cs {  // Comment.Special
+    color: $onedark-comment;
+    font-style: italic;
+  }
+
+  // Errors
+  .err {
+    color: $onedark-red;
+  }
+
+  // Keywords
+  .k,    // Keyword
+  .kc,   // Keyword.Constant
+  .kd,   // Keyword.Declaration
+  .kp,   // Keyword.Pseudo
+  .kr,   // Keyword.Reserved
+  .kt {  // Keyword.Type
+    color: $onedark-purple;
+  }
+
+  .kn {  // Keyword.Namespace (import, from)
+    color: $onedark-purple;
+  }
+
+  // Literals
+  .l {   // Literal
+    color: $onedark-orange;
+  }
+
+  // Names
+  .n {   // Name
+    color: $onedark-fg;
+  }
+
+  // Operators
+  .o,    // Operator
+  .ow {  // Operator.Word
+    color: $onedark-cyan;
+  }
+
+  // Punctuation
+  .p {   // Punctuation
+    color: $onedark-fg;
+  }
+
+  // Generic
+  .ge {  // Generic.Emph
+    font-style: italic;
+  }
+
+  .gs {  // Generic.Strong
+    font-weight: bold;
+  }
+
+  .gd {  // Generic.Deleted
+    color: $onedark-red;
+    background-color: rgba($onedark-red, 0.1);
+  }
+
+  .gi {  // Generic.Inserted
+    color: $onedark-green;
+    background-color: rgba($onedark-green, 0.1);
+  }
+
+  // Strings
+  .ld,   // Literal.Date
+  .s,    // String
+  .sb,   // String.Backtick
+  .sc,   // String.Char
+  .sd,   // String.Doc
+  .s2,   // String.Double
+  .se,   // String.Escape
+  .sh,   // String.Heredoc
+  .si,   // String.Interpol
+  .sx,   // String.Other
+  .sr,   // String.Regex
+  .s1,   // String.Single
+  .ss {  // String.Symbol
+    color: $onedark-green;
+  }
+
+  // Numbers
+  .m,    // Number
+  .mf,   // Number.Float
+  .mh,   // Number.Hex
+  .mi,   // Number.Integer
+  .mo,   // Number.Oct
+  .mb,   // Number.Bin
+  .mx,   // Number.Other
+  .il {  // Number.Integer.Long
+    color: $onedark-orange;
+  }
+
+  // Names - Attributes
+  .na {  // Name.Attribute
+    color: $onedark-orange;
+  }
+
+  // Names - Builtin
+  .nb {  // Name.Builtin
+    color: $onedark-cyan;
+  }
+
+  // Names - Class
+  .nc {  // Name.Class
+    color: $onedark-yellow;
+  }
+
+  // Names - Constant
+  .no {  // Name.Constant
+    color: $onedark-orange;
+  }
+
+  // Names - Decorator
+  .nd {  // Name.Decorator
+    color: $onedark-yellow;
+  }
+
+  // Names - Entity
+  .ni {  // Name.Entity
+    color: $onedark-fg;
+  }
+
+  // Names - Exception
+  .ne {  // Name.Exception
+    color: $onedark-yellow;
+  }
+
+  // Names - Function
+  .nf {  // Name.Function
+    color: $onedark-blue;
+  }
+
+  // Names - Label
+  .nl {  // Name.Label
+    color: $onedark-red;
+  }
+
+  // Names - Namespace
+  .nn {  // Name.Namespace
+    color: $onedark-yellow;
+  }
+
+  // Names - Other
+  .nx {  // Name.Other
+    color: $onedark-blue;
+  }
+
+  // Names - Property
+  .py {  // Name.Property
+    color: $onedark-red;
+  }
+
+  // Names - Tag (HTML/XML)
+  .nt {  // Name.Tag
+    color: $onedark-red;
+  }
+
+  // Names - Variable
+  .nv,   // Name.Variable
+  .vc,   // Name.Variable.Class
+  .vg,   // Name.Variable.Global
+  .vi {  // Name.Variable.Instance
+    color: $onedark-red;
+  }
+
+  // Names - Builtin Pseudo
+  .bp {  // Name.Builtin.Pseudo (self, cls)
+    color: $onedark-red;
+  }
+
+  // Whitespace
+  .w {   // Text.Whitespace
+    color: $onedark-fg;
+  }
+}

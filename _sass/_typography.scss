@@ -1,0 +1,166 @@
+@use "globals" as *;
+
+// Text Selection
+// --------------------------------------------------
+::selection {
+  background-color: rgba(36, 41, 47, 0.15);
+  color: inherit;
+}
+
+// Body
+// --------------------------------------------------
+body {
+  font-family: $base-font;
+  color: $text-color;
+  letter-spacing: 0.5px;
+  line-height: 1.7;
+  -webkit-text-size-adjust: 100%; // Prevent iOS text resize
+}
+
+// Headings
+// --------------------------------------------------
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: $heading-font;
+}
+h1 {
+  margin: 8px 0 12px;
+  @media #{$medium} {
+    font-size: 30px;
+  }
+}
+
+table,
+th,
+td {
+  border-collapse: collapse;
+  border: 1px solid #f2f3f4;
+  font-variant-numeric: tabular-nums;
+}
+
+td,
+th {
+  padding: 6px;
+  text-align: left;
+}
+
+.text-table td,
+.text-table th {
+  padding: 6px 16px;
+}
+
+.text-table,
+th {
+  text-align: left;
+}
+
+// Links
+// --------------------------------------------------
+a {
+  text-decoration: none;
+  color: $link-color;
+  border-radius: 2px;
+  &:hover {
+    color: #404040;
+  }
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px $link-color;
+    color: #404040;
+  }
+  &:hover,
+  &:active {
+    outline: 0;
+  }
+}
+
+.link-arrow {
+  font-weight: 400;
+  text-decoration: underline;
+  font-style: normal;
+}
+
+// Figures
+// --------------------------------------------------
+figcaption {
+  padding-top: 10px;
+  font-size: 15px;
+  line-height: 1.3;
+  color: #505862;
+}
+
+// Note text
+// --------------------------------------------------
+.notice {
+  margin-top: 1.5em;
+  padding: 0.5em 1em;
+  text-indent: 0;
+  font-size: 15px;
+  background-color: $body-color;
+  border: 1px solid #bbbbbb;
+  border-radius: 3px;
+}
+
+// Blockquotes
+// --------------------------------------------------
+blockquote {
+  font-style: normal;
+  border-left: 4px solid $border-color;
+  padding-left: 12px;
+}
+
+// List items
+// --------------------------------------------------
+.entry-content li {
+  margin-bottom: 7px;
+}
+
+// Footnotes
+// --------------------------------------------------
+.entry-content .footnotes {
+  ol,
+  li,
+  p {
+    font-size: 17px;
+  }
+}
+
+// Code
+// --------------------------------------------------
+tt,
+code,
+kbd,
+samp,
+pre {
+  font-family: $code-font;
+}
+p,
+li {
+  code {
+    font-size: 17px;
+    line-height: 1.5;
+    margin: 0 2px;
+    padding: 0 5px;
+    border: 1px solid #e6e6e6;
+    background-color: #f2f2f2;
+    border-radius: 3px;
+  }
+}
+pre {
+  font-size: 17px;
+  line-height: 1.5;
+  overflow-x: auto;
+  &::-webkit-scrollbar {
+    height: 12px;
+    background-color: #34362e;
+    border-radius: 0 0 4px 4px;
+  }
+  &::-webkit-scrollbar-thumb:horizontal {
+    background-color: #6a6d5d;
+    border-radius: 4px;
+  }
+}
