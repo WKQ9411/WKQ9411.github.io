@@ -1,3 +1,4 @@
+{% raw %}
 ﻿---
 layout: post
 title: 【论文解读】YaRN
@@ -345,26 +346,4 @@ $$
 # 一些参考链接
 
 1. [大模型长度扩展综述：从直接外推ALiBi、插值PI、NTK-aware插值(对此介绍最详)、YaRN到S2-Attention](https://blog.csdn.net/v_JULY_v/article/details/135072211)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+{% endraw %}

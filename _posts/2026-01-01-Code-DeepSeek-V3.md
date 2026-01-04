@@ -6,6 +6,7 @@ summary: 从零手撕一个小参数量的DeepSeek-V3模型，包括MLA、MoE、
 categories: Code
 ---
 
+{% raw %}
 # 目录
 {:.no_toc}
 
@@ -1413,18 +1414,4 @@ mtp_loss_lambda: float = 0.0001
 1.   [DeepSeek-V3 MLA 优化全攻略：从低秩压缩到权重吸收，揭秘高性能推理的优化之道 - 知乎](https://zhuanlan.zhihu.com/p/25449691772)
 1.   [全网最细！DeepSeekMTP 多Token预测：从算法原理到代码实现](https://www.bilibili.com/video/BV1QEwReKEHg/?spm_id_from=333.1391.0.0&vd_source=8d0e80baab699baab100ac9fdf2c4028)
   1.   [deepseek技术解读(2)-MTP（Multi-Token Prediction）的前世今生](https://zhuanlan.zhihu.com/p/18056041194)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+{% endraw %}

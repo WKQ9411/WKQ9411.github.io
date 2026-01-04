@@ -6,6 +6,7 @@ summary: 从策略梯度（Policy Gradient，PG）到近端策略优化（Proxim
 categories: Note
 ---
 
+{% raw %}
 # 目录
 {:.no_toc}
 
@@ -570,7 +571,5 @@ PPO与GRPO的区别如下图所示：
 >​&emsp;&emsp;​&emsp;&emsp;通过组相对优势估计计算$o_i$第$t$个token的优势$\hat{A}_{i,t}$  
 >​&emsp;&emsp;​&emsp;&emsp;每个GRPO迭代`iteration = 1, ..., μ`执行：  
 >​&emsp;&emsp;​&emsp;&emsp;​&emsp;&emsp;通过最大化GRPO目标函数更新策略模型$\pi_\theta$  
->​&emsp;&emsp;​&emsp;&emsp;通过使用回放机制（replay mechanism）持续训练更新奖励模型$r_\varphi$  
-
-
-
+>​&emsp;&emsp;​&emsp;&emsp;通过使用回放机制（replay mechanism）持续训练更新奖励模型$r_\varphi$
+{% endraw %}

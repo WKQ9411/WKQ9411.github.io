@@ -1,3 +1,4 @@
+{% raw %}
 ﻿---
 layout: post
 title: 【论文解读】DeepSeek-V3
@@ -798,3 +799,4 @@ RL训练完成后，通过拒绝采样（rejection sampling）从专家模型中
 
 1.   [陈巍：DeepSeek V3/R1的架构与训练技术2万字长文分析（上）](https://zhuanlan.zhihu.com/p/21208287743)
 2.   [陈巍：DeepSeek V3/R1的架构与训练技术2万字长文分析（下）](https://zhuanlan.zhihu.com/p/21755758234)
+{% endraw %}

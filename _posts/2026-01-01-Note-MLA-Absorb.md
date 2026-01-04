@@ -6,6 +6,7 @@ summary: 详细分析MLA中的矩阵吸收计算方式。
 categories: Note
 ---
 
+{% raw %}
 # 目录
 {:.no_toc}
 
@@ -292,3 +293,4 @@ $$
 1.   [训练模型算力的单位：FLOPs、FLOPS、Macs 与 估算模型（FC, CNN, LSTM, Transformers&&LLM）的FLOPs - 知乎](https://zhuanlan.zhihu.com/p/649993943)
 2.   [llm 参数量-计算量-显存占用分析 - Zhang](https://www.armcvai.cn/2024-09-20/llm-params-flops.html#二-计算量分析)
 3.   [DeepSeek-V3 MLA 优化全攻略：从低秩压缩到权重吸收，揭秘高性能推理的优化之道 - 知乎](https://zhuanlan.zhihu.com/p/25449691772)
+{% endraw %}
