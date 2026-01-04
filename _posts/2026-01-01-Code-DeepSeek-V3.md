@@ -1081,7 +1081,7 @@ class Block(nn.Module):
 
 由于DeepSeek-V3未开源训练代码，因此MTP的代码实现仅基于个人理解，未必准确。在[【论文解读】DeepSeek-V3](/2026-01-01/Paper-DeepSeek-V3.html)中，介绍了MTP的基本原理，然而，个人认为原文中的配图和公式具有一定的迷惑性，在此我们进一步深入剖析。论文原图如下：
 
-<div align="center"><img src="https://static.zybuluo.com/wangkunqing13/vk4cfskc8qt1z39d43td0vkm/image.png" width="100%" alt="image.png-104.4kB"></div>
+<div align="center"><img src="https://wkqpicture.oss-cn-beijing.aliyuncs.com/img/20260104155359614.png" width="100%" alt="image.png-104.4kB"></div>
 
 首先结合原文图片看MTP的公式表达。对于输入的第 $i$ 个token $t\_i$ ，在预测深度为 $k$ 时，首先通过投影矩阵融合第 $k-1$ 个预测深度的输出表征 $\mathbf{h}\_i^{k-1} \in \mathbb{R}^d$ 和第 $i+k$ 个token的Embedding $\text{Emb}(t\_{i+k}) \in \mathbb{R}^d$ ：
 

@@ -191,11 +191,11 @@ $$
 
 可以看出，最终在复数域旋转的角度为 $m\theta\_d$ ，即旋转的角度只与位置 $m$ 和维度 $d$ 有关（$\theta\_d \sim d$）。其中，若 $D=64$ ，则 $\theta\_d$ 随维度 $d$ 的变化曲线如下图所示，在本例中，$d$ 的取值范围为0-31。
 
-<div align="center"><img src="https://static.zybuluo.com/wangkunqing13/rvrmtkp8sqe45qpbjy20kht8/image.png" width="100%" alt="image.png-32.5kB"></div>
+<div align="center"><img src="https://wkqpicture.oss-cn-beijing.aliyuncs.com/img/20260104155148251.png" width="100%" alt="image.png-32.5kB"></div>
 
 因此，相同位置下，越高的维度，其 $\theta\_d$ 越小，即旋转角度越小；相同维度时，不同位置的旋转角度为倍数关系。可见，在低维度时，旋转角度延位置方向变化的更快，即高频，对应短波长。反之，在高维度时，是低频，对应长波长。如下图所示（下图的旋转角度只是为了直观而人为设定的）。
 
-<div align="center"><img src="https://static.zybuluo.com/wangkunqing13/7xuitt6ulabd09f0v4w2p7mr/%E6%B3%A2%E9%95%BF.png" width="100%" alt="波长.png-286.1kB"></div>
+<div align="center"><img src="https://wkqpicture.oss-cn-beijing.aliyuncs.com/img/20260104155243681.png" width="100%" alt="波长.png-286.1kB"></div>
 
 **低维度的快速旋转适合捕捉局部的位置关系，高维度的慢速旋转适合捕捉全局的位置关系**。高频细节的重要性：**相邻或相似的token需要依赖高频成分来区分它们的相对位置，低维的最小旋转角度不能过小（即频率不能过低），否则网络无法检测到细微的位置差异**。PI相当于对所有的维度等比例缩放了 $m$ ，会导致高频成分被过度压缩（即相当于使高频频率下降了），丢失关键的高频细节，导致模型无法有效分辨短距离内的token关系。因而当模型在长上下文上微调后，短上下文任务的**困惑度**（perplexity）反而略微增加。理想情况下，在更大的上下文规模上进行微调后，不应降低较小上下文规模的性能。
 
@@ -226,7 +226,7 @@ $$
 
 $s$ 即为前文提到的比例因子，它是扩展的上下文长度和原始上下文长度之比，因此大于1。可见，NTK-aware实际上是将 $\theta\_d$ 的基底 $b$ 进行了放大。仍以上面的 $D=64$ 为例，若将基地从10000放大到50000，两个曲线的对比如下图所示：
 
-<div align="center"><img src="https://static.zybuluo.com/wangkunqing13/4oh4faow0y9po093agky9o8l/image.png" width="100%" alt="image.png-80.7kB"></div>
+<div align="center"><img src="https://wkqpicture.oss-cn-beijing.aliyuncs.com/img/20260104155314382.png" width="100%" alt="image.png-80.7kB"></div>
 
 为了更清楚的看出对基底放大前与放大后 $\theta\_d$ 的大小关系，上图中我们绘制出 $h(x)$ ，即基底放大前与放大后的比值曲线。可见，随着维度的升高，高维度（低频）部分的 $\theta\_d$ 被缩小的倍数越来越大，相比之下低维度（高频）部分缩小的倍数较小。因此对于低维度，若扩展长度L'超过一定值后，更容易使 $L'\theta'\_d > L\theta\_d$ ，即产生越界。
 
