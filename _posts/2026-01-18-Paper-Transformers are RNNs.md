@@ -507,7 +507,7 @@ y_i &= f_l \left( \frac{\phi(x_i W_Q)^\top s_i}{\phi(x_i W_Q)^\top z_i} + x_i \r
 $$
 在上述等式中，对特征函数没有施加任何约束，理论上它可以表示任何 Transformer 模型，包括使用 softmax 注意力的模型。这些公式揭示了 Transformer 和 RNN 之间的关系，是我们更好的理解信息存储与检索的过程。
 
-原文代码链接：[https:// linear-transformers.com](https:// linear-transformers.com) ，其中公式 $\eqref{eq:gq}$ - $\eqref{eq:gv}$ 大约是通过 200 行 CUDA 代码实现的。
+原文代码链接：[https://linear-transformers.com](https://linear-transformers.com) ，其中公式 $\eqref{eq:gq}$ - $\eqref{eq:gv}$ 大约是通过 200 行 CUDA 代码实现的。
 
 # 五、总结
 
