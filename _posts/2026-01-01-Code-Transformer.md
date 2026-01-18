@@ -4,8 +4,10 @@ title: 【手撕系列】手撕Transformer
 date: 2026-01-01 16:00:00 +08:00
 summary: 1.从零构建Transformer模型，并完成中英翻译demo；2.PyTorch封装的Transformer用法介绍，并完成中英翻译demo。
 categories: Code
+excerpt_separator: <!--more-->
 ---
 
+{% raw %}
 # 目录
 {:.no_toc}
 
@@ -2273,3 +2275,4 @@ Predict chinese text: 这是最终的部分。
 7. [【Transformer系列】深入浅出理解Positional Encoding位置编码-CSDN博客](https://blog.csdn.net/m0_37605642/article/details/132866365)
 8. [手撕Transformer！！从每一模块原理讲解到代码实现【超详细!】](https://blog.csdn.net/xiaoh_7/article/details/140019530)
 9. [Transformer — PyTorch 2.3 documentation](https://pytorch.org/docs/2.3/generated/torch.nn.Transformer.html#torch.nn.Transformer)
+{% endraw %}

@@ -4,8 +4,10 @@ title: 【论文解读】YaRN
 date: 2026-01-01 16:00:00 +08:00
 summary: YaRN（Yet another RoPE extensioN method）是一种高效扩展上下文长度的方法，旨在解决Transformer模型在处理超长序列时性能下降的问题。
 categories: Paper
+excerpt_separator: <!--more-->
 ---
 
+{% raw %}
 # 目录
 {:.no_toc}
 
@@ -345,3 +347,4 @@ $$
 # 一些参考链接
 
 1. [大模型长度扩展综述：从直接外推ALiBi、插值PI、NTK-aware插值(对此介绍最详)、YaRN到S2-Attention](https://blog.csdn.net/v_JULY_v/article/details/135072211)
+{% endraw %}
