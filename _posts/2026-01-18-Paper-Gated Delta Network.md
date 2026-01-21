@@ -884,16 +884,18 @@ $$
 \begin{aligned}
 o^r_{[t]} &= \mathbf{S}^r_{[t]} q^r_{[t]} \in \mathbb{R}^{d_v} \\
 &= \mathbf{S}_{[t]} \gamma_{[t]}^r q^r_{[t]} + \sum_{i=1}^{r} \left( \tilde{u}^i_{[t]} - \mathbf{S}_{[t]}\gamma^i_{[t]} w^i_{[t]} \right) \frac{\gamma^r_{[t]}}{\gamma^i_{[t]}} k^{i\top}_{[t]} q^r_{[t]} \\
-&= \mathbf{S}_{[t]} \overleftarrow{q^r_{[t]}} + \sum_{i=1}^{r} \left( \tilde{u}^i_{[t]} - \mathbf{S}_{[t]} \overleftarrow{w^i_{[t]}} \right) \overrightarrow{k^{i\top}_{[t]}} q^r_{[t]}
+&= \mathbf{S}_{[t]} \overleftarrow{q^r_{[t]}} + \sum_{i=1}^{r} \left( \tilde{u}^i_{[t]} - \mathbf{S}_{[t]} \overleftarrow{w^i_{[t]}} \right) \frac{\gamma^r_{[t]}}{\gamma^i_{[t]}} k^{i\top}_{[t]} q^r_{[t]}
 \end{aligned}
 \end{equation}
 $$
-其中，$\overrightarrow{k^{i\top}_{[t]}}$ 是从第 $i$ 个位置衰减到当前位置 $r$，与前面整个 chunk 中直接衰减到 chunk 终点稍有不同，$\left( \tilde{u}^i_{[t]} - \mathbf{S}_{[t]} \overleftarrow{w^i_{[t]}} \right)$ 即是等效 value。$q^r_{[t]}$ 只关注 $r$ 之前的 $\overrightarrow{k^{i\top}_{[t]}}$ 和等效 value，因此，通过将整个 $r=1,2,\ldots,C$ 堆叠，可得到 chunk 的输出为：
+其中，$\left( \tilde{u}^i_{[t]} - \mathbf{S}_{[t]} \overleftarrow{w^i_{[t]}} \right)$ 即等效 value，$q^r_{[t]}$ 只关注 $r$ 之前的 $k^{i\top}_{[t]}$ 和等效 value，因此，通过将整个 $r=1,2,\ldots,C$ 堆叠，可得到 chunk 的输出为：
 $$
 \begin{equation}
-\mathbf{O}_{[t]} = \overleftarrow{\mathbf{Q}_{[t]}} \mathbf{S}_{[t]}^\top + \left( \mathbf{Q}_{[t]} \mathbf{K}_{[t]}^\top \odot \mathbf{M} \right) \left( \widetilde{\mathbf{U}_{[t]}} - \overleftarrow{\mathbf{W}_{[t]}} \mathbf{S}_{[t]}^\top \right) \in \mathbb{R}^{C \times d_v}
+\mathbf{O}_{[t]} = \overleftarrow{\mathbf{Q}_{[t]}} \mathbf{S}_{[t]}^\top + \left( \mathbf{Q}_{[t]} \mathbf{K}_{[t]}^\top \odot \mathbf{\Gamma} \right) \left( \widetilde{\mathbf{U}_{[t]}} - \overleftarrow{\mathbf{W}_{[t]}} \mathbf{S}_{[t]}^\top \right) \in \mathbb{R}^{C \times d_v}
 \end{equation}
 $$
+
+> 这里的 mask 原文写的是 $\mathbf{M}$，但是经过我们的推导，结合原文仓库、Qwen3-Next代码实现来看，这里确实应该是 decay mask $\mathbf{\Gamma}$。详见原文仓库中的：[代码链接](https://github.com/NVlabs/GatedDeltaNet/blob/4decc9b84e7e27b6400fea562096fdd35fe7ef2e/lit_gpt/gated_delta_rule_ops/chunk.py#L680)
 
 #### （4）整理
 
@@ -901,7 +903,7 @@ $$
 $$
 \begin{align}
 \mathbf{S}_{[t+1]} &= \overrightarrow{\mathbf{S}_{[t]}} + \left( \widetilde{\mathbf{U}_{[t]}} - \overleftarrow{\mathbf{W}_{[t]}} \mathbf{S}_{[t]}^\top \right)^\top \overrightarrow{\mathbf{K}_{[t]}} &\in \mathbb{R}^{d_v \times d_k} \\
-\mathbf{O}_{[t]} &= \overleftarrow{\mathbf{Q}_{[t]}} \mathbf{S}_{[t]}^\top + \left( \mathbf{Q}_{[t]} \mathbf{K}_{[t]}^\top \odot \mathbf{M} \right) \left( \widetilde{\mathbf{U}_{[t]}} - \overleftarrow{\mathbf{W}_{[t]}} \mathbf{S}_{[t]}^\top \right) &\in \mathbb{R}^{C \times d_v} \\
+\mathbf{O}_{[t]} &= \overleftarrow{\mathbf{Q}_{[t]}} \mathbf{S}_{[t]}^\top + \left( \mathbf{Q}_{[t]} \mathbf{K}_{[t]}^\top \odot \mathbf{\Gamma} \right) \left( \widetilde{\mathbf{U}_{[t]}} - \overleftarrow{\mathbf{W}_{[t]}} \mathbf{S}_{[t]}^\top \right) &\in \mathbb{R}^{C \times d_v} \\
 \widetilde{\mathbf{U}_{[t]}} &= \left[ \mathbf{I} + \text{strictLower}\left( \text{diag}(\beta_{[t]}) (\mathbf{\Gamma}_{[t]} \odot \mathbf{K}_{[t]} \mathbf{K}^\top_{[t]}) \right) \right]^{-1} \text{diag}(\beta_{[t]}) \mathbf{V}_{[t]} &\in \mathbb{R}^{C \times d_v} \\
 \mathbf{\Gamma}_{[t]} &= 
 \begin{cases}
