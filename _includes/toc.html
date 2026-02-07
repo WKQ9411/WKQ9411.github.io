@@ -1,0 +1,82 @@
+<div class="toc-container">
+  <div class="toc-title">Catalog</div>
+  <ul id="toc-list"></ul>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var tocList = document.getElementById('toc-list');
+  var content = document.querySelector('.entry-content');
+  if (!content || !tocList) return;
+
+  var headers = Array.from(content.querySelectorAll('h1, h2, h3')).filter(function(header) {
+    return !header.classList.contains('post-title');
+  });
+  
+  if (headers.length === 0) {
+     document.querySelector('.toc-container').style.display = 'none';
+     return;
+  }
+
+  headers.forEach(function(header, index) {
+    var id = header.id;
+    if (!id) {
+      id = 'h-' + index;
+      header.id = id;
+    }
+    
+    var li = document.createElement('li');
+    li.className = 'toc-item toc-' + header.tagName.toLowerCase();
+    
+    var a = document.createElement('a');
+    a.href = '#' + id;
+    a.textContent = header.textContent;
+    a.title = header.textContent; // Tooltip for long text
+    
+    li.appendChild(a);
+    tocList.appendChild(li);
+  });
+
+  // Intersection Observer for Scroll Spy
+  var observerOptions = {
+    root: null,
+    rootMargin: '-100px 0px -70% 0px', // Adjust active zone
+    threshold: 0
+  };
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var id = entry.target.id;
+        var activeLink = tocList.querySelector('a[href="#' + id + '"]');
+        
+        if (activeLink) {
+          tocList.querySelectorAll('a').forEach(function(link) {
+            link.classList.remove('active');
+          });
+          activeLink.classList.add('active');
+        }
+      }
+    });
+  }, observerOptions);
+
+  headers.forEach(function(header) {
+    observer.observe(header);
+  });
+  
+  // Show TOC after scrolling past banner
+  var tocContainer = document.querySelector('.toc-container');
+  var bannerHeight = 250; // Approximation of banner height
+  
+  function checkScroll() {
+    if (window.scrollY > bannerHeight) {
+      tocContainer.classList.add('visible');
+    } else {
+      tocContainer.classList.remove('visible');
+    }
+  }
+  
+  window.addEventListener('scroll', checkScroll);
+  checkScroll(); // Check initial state
+});
+</script>

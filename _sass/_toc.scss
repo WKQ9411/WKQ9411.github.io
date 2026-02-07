@@ -1,0 +1,101 @@
+@use "variables" as *;
+
+.toc-container {
+  display: none; // Hidden by default
+  position: fixed;
+  top: 100px;
+  // Calculation: Center (50%) - Half Content (450px) - TOC Width (220px) - Gap (20px)
+  left: calc(50% - 450px - 240px); 
+  width: 220px;
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+  z-index: 10;
+  
+  // Visual style
+  padding: 10px;
+  
+  // Animation
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  // Only show when there is enough space
+  // Content (900) + 2 * (TOC(220) + Gap(20)) = 900 + 480 = 1380
+  @media (min-width: 1400px) {
+    display: block;
+  }
+
+  .toc-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: $header-color;
+    padding-left: 10px;
+    border-left: 4px solid $primary;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    margin-bottom: 6px;
+    line-height: 1.4;
+    
+    a {
+      display: block;
+      color: $text-color;
+      text-decoration: none;
+      font-size: 14px;
+      padding: 4px 10px;
+      border-left: 2px solid transparent;
+      transition: all 0.2s ease;
+      opacity: 0.8;
+      
+      &:hover {
+        color: $primary;
+        opacity: 1;
+        background-color: rgba($primary, 0.05);
+        border-radius: 0 4px 4px 0;
+      }
+      
+      &.active {
+        color: $primary;
+        font-weight: bold;
+        border-left-color: $primary;
+        opacity: 1;
+        background-color: rgba($primary, 0.05);
+        border-radius: 0 4px 4px 0;
+      }
+    }
+  }
+
+  // Indentation for hierarchy
+  .toc-h1 {
+    a { font-weight: bold; }
+  }
+  
+  .toc-h2 {
+    a { padding-left: 20px; }
+  }
+  
+  .toc-h3 {
+    a { padding-left: 30px; font-size: 13px; }
+  }
+  
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: $border-color;
+    border-radius: 2px;
+  }
+}
