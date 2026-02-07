@@ -5,7 +5,7 @@ $base-font: "TsangerJinKai02", "STKaiti", "KaiTi", -apple-system,
   "Apple Color Emoji", "Segoe UI Emoji";
 $heading-font: $base-font;
 $caption-font: $base-font;
-$code-font: $base-font;
+$code-font: "Consolas", "Courier New", ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono", "DejaVu Sans Mono", "Noto Sans Mono", monospace;
 $alt-font: serif;
 
 $doc-font-size: 15;
