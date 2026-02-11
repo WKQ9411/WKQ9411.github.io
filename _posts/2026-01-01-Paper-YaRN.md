@@ -58,7 +58,7 @@ $$
 \end{equation}
 $$
 
-因此，内积 $\mathbf{q}^T \mathbf{k}$ 就可变为标准Hermitian内积的实部：$\operatorname{Re}(\mathbf{q}^\* \mathbf{k})$ 。更具体地说，这一同构映射通过交错实部与虚部的方式进行组合（即两两维度组合为一个复数向量），例如：
+因此，内积 $\mathbf{q}^T \mathbf{k}$ 就可变为标准Hermitian内积的实部：$\operatorname{Re}(\mathbf{q}^* \mathbf{k})$ 。更具体地说，这一同构映射通过交错实部与虚部的方式进行组合（即两两维度组合为一个复数向量），例如：
 
 $$
 \begin{align}
@@ -123,7 +123,7 @@ $$
 
 $$
 \begin{equation}
-f_{\mathbf{W}}'(\mathbf{x}_m, m, \theta_d) = f_{\mathbf{W}}\left(\mathbf{x}_m, \frac{mL}{L'}, \theta_d\right) \label{eq:1}
+f_{\mathbf{W}}'(\mathbf{x}_m, m, \theta_d) = f_{\mathbf{W}}\left(\mathbf{x}_m, \frac{mL}{L'}, \theta_d \right) \label{eq:1}
 \end{equation}
 $$
 
@@ -215,14 +215,6 @@ $$
 $$
 \begin{equation}
 b' = b \cdot s^{\frac{|D|}{|D| - 2}}
-\end{equation}
-$$
-
-即：
-
-$$
-\begin{equation}
-h(\theta_d) = {(b \cdot s)}^{-\frac{2d}{|D|-2}}
 \end{equation}
 $$
 
