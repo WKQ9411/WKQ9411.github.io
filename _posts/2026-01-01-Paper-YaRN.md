@@ -258,7 +258,7 @@ $s$ 即为前文提到的比例因子，它是扩展的上下文长度和原始�
 
 $$
 \begin{equation}
-r(d)=\frac{L}{\lambda_d}=\frac{L}{2 \pi b'^{\frac{2d}{|D|}}}
+r(d)=\frac{L}{\lambda_d}=\frac{L}{2 \pi b^{\frac{2d}{|D|}}}
 \end{equation}
 $$
 
@@ -266,6 +266,12 @@ $$
 
  - 所有满足 $r(d)<\alpha$ 的维度 $d$ ，通过缩放因子 $s$ 对其进行**线性内插**（类似于PI，可确保不越出边界）
  - 所有满足 $r(d)>\beta$ 的维度 $d$ ，**不进行插值**
+
+如下图所示：
+
+<div align="center"><img src="https://wkqpicture.oss-cn-beijing.aliyuncs.com/img/20260212103018.png" width="80%" alt="output"></div>
+
+其中，红色底色代表短波长、高频的低维部分，绿色底色代表长波长、低频的高维部分。
 
 定义斜坡函数（ramp function） $\gamma$ ：
 
@@ -289,7 +295,7 @@ h(\theta_d) &= \left(1 - \gamma(r(d))\right) \frac{\theta_d}{s} + \gamma(r(d)) \
 \end{align}
 $$
 
-$\alpha, \beta$ 的值应根据实际情况进行调整。对于Llama模型，实验发现较好的值为 $\alpha=1, \beta=32$ 。NTK-by-parts不论是在微调还是非微调模型中，表现均由于PI和NTK-aware。
+$\alpha, \beta$ 的值应根据实际情况进行调整。对于Llama模型，实验发现较好的值为 $\alpha=1, \beta=32$ 。NTK-by-parts不论是在微调还是非微调模型中，表现均优于PI和NTK-aware。
 
 ## （三）动态缩放——Dynamic NTK插值法
 
