@@ -5,4 +5,8 @@
 - 🌱 我是 WKQ，一名还在路上的学习者。
 - 📚 在这里记录我的学习笔记、论文解读和技术思考。
 
-> 博客基于 [cosy-jekyll-theme](https://github.com/tw93/tw93.github.io) 修改。
+欢迎关注微信公众号：
+
+<div align="center"><img src="./images/social/wechat.png" width="30%" alt="wechat"></div>
+
+> 本博客基于 [cosy-jekyll-theme](https://github.com/tw93/tw93.github.io) 修改。

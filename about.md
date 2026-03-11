@@ -12,3 +12,4 @@ hideHomeActive: true
 ## 关注
 - [Github](https://github.com/WKQ9411)
 - [CSDN](https://blog.csdn.net/m0_55846238?type=blog)
+- [微信公众号：Q了个K](/images/social/wechat.png){:target="_blank" rel="noopener"}
