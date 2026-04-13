@@ -1,9 +1,9 @@
 ---
 layout: post
-title: 【笔记】从策略梯度到PPO再到GRPO
-date: 2026-01-01 16:00:00 +08:00
+title: 【强化学习】从策略梯度到PPO再到GRPO
+date: 2026-03-22 16:00:00 +08:00
 summary: 从策略梯度（Policy Gradient，PG）到近端策略优化（Proximal Policy Optimization, PPO），再到群组相对策略优化（Group Relative Policy Optimization, GRPO）的逐步介绍。
-categories: Note
+categories: RL
 excerpt_separator: <!--more-->
 ---
 
